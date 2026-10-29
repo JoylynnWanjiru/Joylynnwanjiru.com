@@ -6,6 +6,10 @@ import mdx from '@astrojs/mdx';
 import keystatic from '@keystatic/astro';
 import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
+import { buildRules } from './build/build-rules.mjs';
+
+const site = 'https://joylynnwanjiru.com';
+const rules = buildRules(site);
 
 // Keystatic local mode needs Node.js file access, but with the Cloudflare
 // adapter `astro dev` runs in workerd. So dev runs on Node without the
@@ -18,7 +22,7 @@ const fontFile = (pkg, file) => `./node_modules/${pkg}/files/${file}`;
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://joylynnwanjiru.com',
+  site,
   output: 'static',
   // 'compile' optimises images with sharp at build time (brief section 2),
   // instead of the adapter default that resizes at request time.
@@ -31,8 +35,13 @@ export default defineConfig({
     react(),
     mdx(),
     keystatic(),
-    // sitemap-index.xml; noindex pages are also removed by the build rules (BR-6).
-    sitemap({ filter: (page) => !/\/(keystatic|404)(\/|$)/.test(new URL(page).pathname) }),
+    // Order matters: prepare reads the hidden pages before the sitemap is written,
+    // verify checks the finished sitemap, RSS and llms.txt (build/build-rules.mjs).
+    rules.prepare,
+    sitemap({
+      filter: (page) => rules.sitemapFilter(page) && !/\/(keystatic|404)(\/|$)/.test(new URL(page).pathname),
+    }),
+    rules.verify,
   ],
   vite: { plugins: [tailwindcss()] },
   fonts: [

@@ -1,0 +1,26 @@
+{
+  "name": "Joylynn Wanjiru",
+  "tagline": "One step at a time.",
+  "heroLine": "I build software people can trust: for public institutions, communities and growing businesses.",
+  "email": "TODO(joylynn): contact email",
+  "location": "Nairobi, Kenya",
+  "timeZone": "EAT, UTC+3",
+  "socials": [],
+  "bookingLinks": {
+    "freeCall": null,
+    "audit": null
+  },
+  "currency": "USD",
+  "auditPrice": 77,
+  "buildFrom": 500,
+  "deposit": 60,
+  "analytics": {
+    "cloudflareToken": null,
+    "eventTrackerId": null
+  },
+  "verification": {
+    "google": null,
+    "bing": null
+  },
+  "beehiivPublicationId": null
+}

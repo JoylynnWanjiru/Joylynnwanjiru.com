@@ -1,7 +1,8 @@
 {
   "extends": "astro/tsconfigs/strict",
   "include": [".astro/types.d.ts", "**/*"],
-  "exclude": ["dist"],
+  // The two config files use Node APIs, whose types (@types/node) are not installed yet.
+  "exclude": ["dist", "astro.config.mjs", "vitest.config.ts"],
   "compilerOptions": {
     "paths": {
       "@assets/*": ["./src/assets/*"]

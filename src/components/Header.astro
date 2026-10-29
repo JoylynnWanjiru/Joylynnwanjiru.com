@@ -1,7 +1,8 @@
 ---
-import { nav, site, workWithMe } from '../lib/site';
+import { getSite, nav, workWithMe } from '../lib/site';
 import ThemeToggle from './ThemeToggle.astro';
 
+const site = await getSite();
 const path = Astro.url.pathname;
 const isActive = (href: string) => path === href || path.startsWith(`${href}/`);
 const linkClass = (href: string) =>

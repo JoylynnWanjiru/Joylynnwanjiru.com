@@ -374,7 +374,7 @@ Also show: email address, "Based in Nairobi (EAT, UTC+3): overlaps the full Euro
 - Joylynn's role: Backend and AI Engineer. Team: with Chris Waweru Gichohi ([@chriswawerusc](https://github.com/chriswawerusc)), frontend engineer and solutions architect.
 - Recognition: finalist, Responsible Computing Buildathon (Mozilla Foundation × KamiLimu), July 2026. Piloted for Nakuru County.
 - Stack (from the repo): Python, FastAPI, PostgreSQL with pgvector, fastembed, Anthropic Claude, Twilio (WhatsApp), PyMuPDF, Streamlit admin dashboard, Docker.
-- Repo: https://github.com/JoylynnWamjiru/Wazi-
+- Repo: https://github.com/JoylynnWanjiru/Wazi-
 - Services: Automation & AI.
 
 ### Microcopy
@@ -511,7 +511,7 @@ Each phase ends with its **definition of done** passing and a preview deployment
 
 ## 11. Decisions already made (do not reopen without Joylynn)
 
-- Name: Joylynn Wanjiru · GitHub: [JoylynnWamjiru](https://github.com/JoylynnWamjiru)
+- Name: Joylynn Wanjiru · GitHub: [JoylynnWanjiru](https://github.com/JoylynnWanjiru)
 - Hosting: Cloudflare (not Vercel Hobby) · Domain: joylynnwanjiru.com
 - Editor: Keystatic · Newsletter: Beehiiv, "One Step"
 - Fonts: Plus Jakarta Sans, Inter, JetBrains Mono · Two themes
@@ -662,4 +662,4 @@ Audit credit: valid 30 days from plan delivery; after that the full build price 
 - [Cloudflare domain pricing, October 2026 (CostGoat)](https://costgoat.com/pricing/cloudflare-domains)
 - [Keystatic with Astro (Astro docs)](https://docs.astro.build/en/guides/cms/keystatic/)
 - [beehiiv pricing 2026 (DailyAIFixs)](https://dailyaifixs.com/blog/beehiiv-pricing-2026-the-2-500-subscriber-cliff)
-- [Wazi repository](https://github.com/JoylynnWamjiru/Wazi-)
+- [Wazi repository](https://github.com/JoylynnWanjiru/Wazi-)

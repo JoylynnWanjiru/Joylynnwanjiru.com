@@ -1,0 +1,19 @@
+---
+import { getCollection } from 'astro:content';
+
+const posts = await getCollection('posts');
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Keystatic spike</title>
+  </head>
+  <body>
+    <h1>Keystatic spike</h1>
+    <ul>
+      {posts.map((post) => <li><a href={`/writing/${post.id}`}>{post.data.title}</a></li>)}
+    </ul>
+  </body>
+</html>

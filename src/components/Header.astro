@@ -1,0 +1,99 @@
+---
+import { nav, site, workWithMe } from '../lib/site';
+import ThemeToggle from './ThemeToggle.astro';
+
+const path = Astro.url.pathname;
+const isActive = (href: string) => path === href || path.startsWith(`${href}/`);
+const linkClass = (href: string) =>
+  `no-underline hover:text-blue ${isActive(href) ? 'text-blue font-medium' : 'text-ink'}`;
+---
+
+<header class="border-b border-line">
+  <div class="container-site flex h-16 items-center justify-between gap-4">
+    <a href="/" class="font-heading text-lg font-bold text-ink no-underline">{site.name}</a>
+
+    <nav aria-label="Main" class="hidden items-center gap-6 md:flex">
+      {
+        nav.map((item) => (
+          <a href={item.href} class={linkClass(item.href)} aria-current={isActive(item.href) ? 'page' : undefined}>
+            {item.label}
+          </a>
+        ))
+      }
+      <a
+        href={workWithMe.href}
+        class="font-medium text-blue underline decoration-2"
+        aria-current={isActive(workWithMe.href) ? 'page' : undefined}>{workWithMe.label}</a
+      >
+    </nav>
+
+    <div class="flex items-center gap-1">
+      <!-- Search falls back to the writing index until Pagefind arrives (phase 3, brief 12.4). -->
+      <a href="/writing" class="inline-flex size-10 items-center justify-center rounded-full text-ink hover:bg-soft" aria-label="Search writing">
+        <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="7"></circle>
+          <path d="m20 20-3.5-3.5"></path>
+        </svg>
+      </a>
+      <ThemeToggle />
+      <button
+        type="button"
+        class="menu-button inline-flex size-10 items-center justify-center rounded-full text-ink hover:bg-soft md:hidden"
+        aria-expanded="false"
+        aria-controls="mobile-menu"
+        aria-label="Menu"
+        data-menu-button
+      >
+        <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <path d="M4 7h16M4 12h16M4 17h16"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <nav id="mobile-menu" aria-label="Main" class="mobile-menu border-t border-line md:hidden" data-menu-panel>
+    <ul class="container-site flex flex-col py-2">
+      {
+        [...nav, workWithMe].map((item) => (
+          <li>
+            <a
+              href={item.href}
+              class={`block py-3 ${item === workWithMe ? 'font-medium text-blue underline' : linkClass(item.href)}`}
+              aria-current={isActive(item.href) ? 'page' : undefined}
+            >
+              {item.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
+</header>
+
+<style>
+  /* Without JavaScript the menu stays open and the button is hidden. */
+  :global(html.js) .mobile-menu:not(.is-open) {
+    display: none;
+  }
+  :global(html:not(.js)) .menu-button {
+    display: none;
+  }
+</style>
+
+<script>
+  const button = document.querySelector<HTMLButtonElement>('[data-menu-button]');
+  const panel = document.querySelector<HTMLElement>('[data-menu-panel]');
+  if (button && panel) {
+    const setOpen = (open: boolean) => {
+      panel.classList.toggle('is-open', open);
+      button.setAttribute('aria-expanded', String(open));
+    };
+    button.addEventListener('click', () => setOpen(button.getAttribute('aria-expanded') !== 'true'));
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && button.getAttribute('aria-expanded') === 'true') {
+        setOpen(false);
+        button.focus();
+      }
+    });
+  }
+</script>

@@ -16,12 +16,17 @@
     "@astrojs/cloudflare": "14.4.2",
     "@astrojs/mdx": "8.1.1",
     "@astrojs/react": "7.1.1",
+    "@fontsource-variable/inter": "5.3.0",
+    "@fontsource-variable/plus-jakarta-sans": "5.3.0",
+    "@fontsource/jetbrains-mono": "5.3.0",
     "@keystatic/astro": "6.0.0",
     "@keystatic/core": "0.6.9",
+    "@tailwindcss/vite": "4.3.3",
     "astro": "7.4.2",
-    "react": "^19.3.1",
-    "react-dom": "^19.3.1",
-    "sharp": "0.35.5"
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "sharp": "0.35.5",
+    "tailwindcss": "4.3.3"
   },
   "devDependencies": {
     "wrangler": "4.152.0"

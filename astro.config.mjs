@@ -1,14 +1,18 @@
 // @ts-check
-import { defineConfig } from 'astro/config';
+import { defineConfig, fontProviders } from 'astro/config';
 import cloudflare from '@astrojs/cloudflare';
 import react from '@astrojs/react';
 import mdx from '@astrojs/mdx';
 import keystatic from '@keystatic/astro';
+import tailwindcss from '@tailwindcss/vite';
 
 // Keystatic local mode needs Node.js file access, but with the Cloudflare
 // adapter `astro dev` runs in workerd. So dev runs on Node without the
 // adapter; builds and previews use the adapter.
 const isDev = process.argv.includes('dev');
+
+// Self-hosted fonts from the brief's Fontsource packages, Latin subset only.
+const fontFile = (pkg, file) => `./node_modules/${pkg}/files/${file}`;
 
 // https://astro.build/config
 export default defineConfig({
@@ -20,4 +24,55 @@ export default defineConfig({
   // No Astro sessions; stops the adapter provisioning a KV namespace.
   session: false,
   integrations: [react(), mdx(), keystatic()],
+  vite: { plugins: [tailwindcss()] },
+  fonts: [
+    {
+      provider: fontProviders.local(),
+      name: 'Plus Jakarta Sans',
+      cssVariable: '--font-jakarta',
+      fallbacks: ['sans-serif'],
+      options: {
+        variants: [
+          {
+            weight: '200 800',
+            style: 'normal',
+            display: 'swap',
+            src: [fontFile('@fontsource-variable/plus-jakarta-sans', 'plus-jakarta-sans-latin-wght-normal.woff2')],
+          },
+        ],
+      },
+    },
+    {
+      provider: fontProviders.local(),
+      name: 'Inter',
+      cssVariable: '--font-inter',
+      fallbacks: ['sans-serif'],
+      options: {
+        variants: [
+          {
+            weight: '100 900',
+            style: 'normal',
+            display: 'swap',
+            src: [fontFile('@fontsource-variable/inter', 'inter-latin-wght-normal.woff2')],
+          },
+        ],
+      },
+    },
+    {
+      provider: fontProviders.local(),
+      name: 'JetBrains Mono',
+      cssVariable: '--font-jetbrains',
+      fallbacks: ['monospace'],
+      options: {
+        variants: [
+          {
+            weight: '400',
+            style: 'normal',
+            display: 'swap',
+            src: [fontFile('@fontsource/jetbrains-mono', 'jetbrains-mono-latin-400-normal.woff2')],
+          },
+        ],
+      },
+    },
+  ],
 });

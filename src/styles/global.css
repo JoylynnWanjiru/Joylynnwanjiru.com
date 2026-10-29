@@ -1,0 +1,141 @@
+@import 'tailwindcss';
+
+/* Colour tokens: copied exactly from brief section 3. Do not change values here
+   without updating the brief; contrast was checked against these pairs. */
+:root{
+  --bg:#FFFFFF;
+  --soft:#F6F8FC;        /* neutral areas: code blocks, footer, tables */
+  --ink:#16213A;
+  --muted:#5A6577;
+  --line:#E7EAF1;
+  --blue:#2B5CE6;        /* primary accent: links, buttons, focus */
+  --pink:#E8468D;        /* secondary spark: large type, decoration only */
+  --pink-text:#C92F72;   /* pink words at body size (5.08:1 on white) */
+  --on-blue:#FFFFFF;     /* text on blue buttons */
+  --wash:#FEF4F8;        /* 6% pink into white: hero, newsletter band */
+  --tint:#FCE9F1;        /* 12%: pills, tags, badges, card hover */
+  --tint-line:#F4D6E3;   /* pink hairline: card borders, pill outlines */
+  --glow: radial-gradient(60% 50% at 80% 0%, rgb(232 70 141 / .10), transparent 70%),
+          radial-gradient(50% 40% at 0% 100%, rgb(43 92 230 / .06), transparent 70%);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0B1324; --soft:#121B30; --ink:#EAEEF7; --muted:#9AA6BD; --line:#233149;
+    --blue:#5B8BFF; --pink:#FF6AA6; --pink-text:#FF6AA6; --on-blue:#0B1324;
+    --wash:#1A182C; --tint:#2D1F36; --tint-line:#3A2742;
+    --glow: radial-gradient(60% 50% at 80% 0%, rgb(255 106 166 / .14), transparent 70%),
+            radial-gradient(50% 40% at 0% 100%, rgb(91 139 255 / .08), transparent 70%);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0B1324; --soft:#121B30; --ink:#EAEEF7; --muted:#9AA6BD; --line:#233149;
+  --blue:#5B8BFF; --pink:#FF6AA6; --pink-text:#FF6AA6; --on-blue:#0B1324;
+  --wash:#1A182C; --tint:#2D1F36; --tint-line:#3A2742;
+  --glow: radial-gradient(60% 50% at 80% 0%, rgb(255 106 166 / .14), transparent 70%),
+          radial-gradient(50% 40% at 0% 100%, rgb(91 139 255 / .08), transparent 70%);
+  color-scheme: dark;
+}
+
+/* Tailwind names for the tokens (bg-bg, text-ink, border-line, bg-wash, ...).
+   `inline` keeps them as var() references so both themes switch at runtime. */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-soft: var(--soft);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-blue: var(--blue);
+  --color-pink: var(--pink);
+  --color-pink-text: var(--pink-text);
+  --color-on-blue: var(--on-blue);
+  --color-wash: var(--wash);
+  --color-tint: var(--tint);
+  --color-tint-line: var(--tint-line);
+
+  /* Font variables are set by Astro's <Font> component (astro.config.mjs). */
+  --font-heading: var(--font-jakarta);
+  --font-body: var(--font-inter);
+  --font-code: var(--font-jetbrains);
+}
+
+@theme {
+  /* Fluid type scale (brief section 3). */
+  --text-sm: clamp(0.875rem, 0.85rem + 0.1vw, 0.9375rem);
+  --text-base: clamp(1rem, 0.97rem + 0.15vw, 1.0625rem);
+  --text-post: clamp(1.0625rem, 1.03rem + 0.17vw, 1.125rem); /* 17 px mobile, 18 px desktop */
+  --text-lg: clamp(1.125rem, 1.08rem + 0.25vw, 1.25rem);
+  --text-xl: clamp(1.25rem, 1.15rem + 0.5vw, 1.5rem);
+  --text-2xl: clamp(1.5rem, 1.3rem + 1vw, 2rem);
+  --text-3xl: clamp(1.875rem, 1.5rem + 1.8vw, 2.75rem);
+  --text-4xl: clamp(2.25rem, 1.7rem + 2.7vw, 3.5rem);
+
+  --container-site: 72rem;
+  --container-article: 42rem;
+}
+
+@layer base {
+  html {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    font-size: var(--text-base);
+    line-height: 1.6;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+  }
+  h1, h2, h3, h4 {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+  h3, h4 { font-weight: 600; }
+  code, kbd, pre, samp { font-family: var(--font-code); }
+  a { color: var(--blue); text-underline-offset: 0.2em; }
+  :focus-visible {
+    outline: 2px solid var(--blue);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+}
+
+@layer components {
+  /* Page container: 72 rem max, 16 px gutters on mobile. */
+  .container-site {
+    width: 100%;
+    max-width: var(--container-site);
+    margin-inline: auto;
+    padding-inline: 1rem;
+  }
+  @media (min-width: 48rem) {
+    .container-site { padding-inline: 2rem; }
+  }
+  .skip-link {
+    position: absolute;
+    left: 1rem;
+    top: -3rem;
+    z-index: 50;
+    padding: 0.5rem 1rem;
+    background: var(--blue);
+    color: var(--on-blue);
+    border-radius: 0.375rem;
+    text-decoration: none;
+  }
+  .skip-link:focus { top: 1rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -4,6 +4,7 @@ import cloudflare from '@astrojs/cloudflare';
 import react from '@astrojs/react';
 import mdx from '@astrojs/mdx';
 import keystatic from '@keystatic/astro';
+import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 
 // Keystatic local mode needs Node.js file access, but with the Cloudflare
@@ -21,10 +22,18 @@ export default defineConfig({
   output: 'static',
   // 'compile' optimises images with sharp at build time (brief section 2),
   // instead of the adapter default that resizes at request time.
-  adapter: isDev ? undefined : cloudflare({ imageService: 'compile' }),
+  // Static pages prerender in Node: the social image generator uses
+  // @resvg/resvg-js (a native addon) and reads font files from disk.
+  adapter: isDev ? undefined : cloudflare({ imageService: 'compile', prerenderEnvironment: 'node' }),
   // No Astro sessions; stops the adapter provisioning a KV namespace.
   session: false,
-  integrations: [react(), mdx(), keystatic()],
+  integrations: [
+    react(),
+    mdx(),
+    keystatic(),
+    // sitemap-index.xml; noindex pages are also removed by the build rules (BR-6).
+    sitemap({ filter: (page) => !/\/(keystatic|404)(\/|$)/.test(new URL(page).pathname) }),
+  ],
   vite: { plugins: [tailwindcss()] },
   fonts: [
     {

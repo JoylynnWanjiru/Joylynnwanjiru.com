@@ -40,3 +40,10 @@ This repo builds joylynnwanjiru.com. **`BUILD_BRIEF.md` is the single source of 
 
 - `astro dev` runs on Node without the Cloudflare adapter, because Keystatic local mode refuses to run in workerd. `astro build` and `astro preview` use the adapter.
 - This machine has about 8 GB RAM: never run a build while a dev or preview server is running.
+- Keystatic GitHub mode works on Cloudflare (no fallback needed). Its three secrets (`KEYSTATIC_GITHUB_CLIENT_ID`, `KEYSTATIC_GITHUB_CLIENT_SECRET`, `KEYSTATIC_SECRET`) are read at runtime via `getSecret` and are stored on the Worker. `PUBLIC_KEYSTATIC_GITHUB_APP_SLUG` is inlined at build time, so it is a Workers Builds build variable.
+- Cloudflare Workers Builds is connected: `main` deploys to production, other branches deploy a preview at `https://<branch>-joylynnwanjiru.joylynnwanjiru-com.workers.dev`. Previews have their own secrets, so sign in to `/keystatic` on the production workers.dev URL, not on previews.
+- Keystatic opens on `main`; switch branch in its top-left menu to edit another branch. Its commits are titled "Update <path>", not our `chore:`/`fix:` style.
+- `packageManager` in `package.json` pins pnpm; without it Workers Builds uses an old pnpm that rejects our settings-only `pnpm-workspace.yaml`. Bump it and the lockfile together.
+- The build copies `.env` into `dist/server/.dev.vars`. It is not uploaded on deploy (checked with a dry run), and `dist/` is gitignored.
+- GitHub App redirect URIs: `127.0.0.1:4321` for local and the workers.dev URL. Add the real domain's callback when it goes live.
+- Branch protection is not available on a free account with a private repo; brief 12.5 assumes `main` is protected (open decision for Joylynn).

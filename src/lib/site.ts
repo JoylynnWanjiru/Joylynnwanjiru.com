@@ -1,9 +1,12 @@
-// Values the layout needs before the site settings singleton exists.
-// feature/content-model moves these into Keystatic site settings (brief section 4).
-export const site = {
-  name: 'Joylynn Wanjiru',
-  signature: 'One step at a time.',
-} as const;
+import { getEntry } from 'astro:content';
+
+// Site settings come from the Keystatic singleton (src/content/settings/site.json),
+// so names, contact details and prices are edited in one place (BR-7).
+export async function getSite() {
+  const entry = await getEntry('site', 'site');
+  if (!entry) throw new Error('Missing site settings: src/content/settings/site.json');
+  return entry.data;
+}
 
 export const nav = [
   { href: '/writing', label: 'Writing' },

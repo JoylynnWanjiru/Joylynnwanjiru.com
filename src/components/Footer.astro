@@ -1,7 +1,8 @@
 ---
-import { site } from '../lib/site';
+import { getSite } from '../lib/site';
 import Todo from './Todo.astro';
 
+const site = await getSite();
 const year = new Date().getFullYear();
 ---
 

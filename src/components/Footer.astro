@@ -1,0 +1,28 @@
+---
+import { site } from '../lib/site';
+import Todo from './Todo.astro';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="mt-auto border-t border-line bg-soft">
+  <div class="container-site grid gap-10 py-12 md:grid-cols-2">
+    <div class="space-y-4">
+      <p class="font-heading text-lg font-bold text-ink">{site.name}</p>
+      <p class="text-muted"><Todo need="short bio line for the footer" /></p>
+      <p class="text-muted"><Todo need="social links" /></p>
+    </div>
+
+    <section aria-labelledby="newsletter-heading" class="space-y-2">
+      <h2 id="newsletter-heading" class="text-xl">One Step</h2>
+      <p class="text-muted">What I'm building, learning and figuring out, one step at a time.</p>
+      <!-- The subscribe form arrives with the Beehiiv integration (phase 3). -->
+    </section>
+  </div>
+
+  <div class="container-site flex flex-wrap gap-x-6 gap-y-2 border-t border-line py-6 text-sm text-muted">
+    <p>© {year} {site.name}</p>
+    <a href="/rss.xml">RSS</a>
+    <p>Built with <a href="https://astro.build">Astro</a></p>
+  </div>
+</footer>

@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
 
 export async function getStaticPaths() {
   const posts = await getCollection('posts');
@@ -11,16 +12,19 @@ const { post } = Astro.props;
 const { Content } = await render(post);
 ---
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{post.data.title}</title>
-  </head>
-  <body>
-    <h1>{post.data.title}</h1>
-    <p>{post.data.description}</p>
-    {post.data.cover && <Image src={post.data.cover} alt={post.data.coverAlt ?? ''} width={800} />}
-    <Content />
-  </body>
-</html>
+<BaseLayout title={post.data.title} description={post.data.description}>
+  <article class="container-site py-12">
+    <div class="mx-auto max-w-article">
+      <h1 class="text-4xl">{post.data.title}</h1>
+      <p class="mt-4 text-lg text-muted">{post.data.description}</p>
+      {
+        post.data.cover && (
+          <Image src={post.data.cover} alt={post.data.coverAlt ?? ''} width={672} class="mt-8 h-auto w-full rounded-lg" />
+        )
+      }
+      <div class="mt-8 text-post leading-[1.7]">
+        <Content />
+      </div>
+    </div>
+  </article>
+</BaseLayout>

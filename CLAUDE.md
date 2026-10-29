@@ -13,7 +13,8 @@ This repo builds joylynnwanjiru.com. **`BUILD_BRIEF.md` is the single source of 
 ## Git: Claude runs it
 
 - **Run git and `gh` commands yourself** (add, commit, branch, checkout, push, pull, merge, PRs). After each step, tell Joylynn what you ran and the commit message used.
-- **Ask first before anything destructive or hard to undo:** force-push, `reset --hard`, rewriting history, deleting branches, creating or deleting repos, merging into `main`. Explain what it does and wait for her to confirm.
+- **Merge pull requests yourself** once the build and checks pass (Joylynn approved this on 29 October 2026). Report each merge.
+- **Ask first before anything destructive or hard to undo:** force-push, `reset --hard`, rewriting history, deleting branches, creating or deleting repos. Explain what it does and wait for her to confirm.
 - No attribution lines (Co-Authored-By, "Generated with") in commit messages or pull requests.
 - The GitHub repo is `JoylynnWanjiru/Joylynnwanjiru.com` (private).
 

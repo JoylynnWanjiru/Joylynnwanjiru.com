@@ -12,6 +12,7 @@ import tailwindcss from '@tailwindcss/vite';
 const isDev = process.argv.includes('dev');
 
 // Self-hosted fonts from the brief's Fontsource packages, Latin subset only.
+/** @param {string} pkg @param {string} file */
 const fontFile = (pkg, file) => `./node_modules/${pkg}/files/${file}`;
 
 // https://astro.build/config

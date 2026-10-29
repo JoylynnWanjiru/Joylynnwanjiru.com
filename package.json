@@ -12,7 +12,9 @@
     "preview": "astro preview",
     "astro": "astro",
     "test": "vitest run",
-    "check": "astro check"
+    "check": "astro check",
+    "urls:check": "node scripts/published-urls.mjs --check",
+    "urls:update": "node scripts/published-urls.mjs --update"
   },
   "dependencies": {
     "@astrojs/cloudflare": "14.4.2",

@@ -2,18 +2,10 @@
 import { Font } from 'astro:assets';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import { getSite } from '../lib/site';
+import SEOHead, { type Props as SEOProps } from '../components/SEOHead.astro';
 import '../styles/global.css';
 
-interface Props {
-  title?: string;
-  description?: string;
-}
-
-// Full SEO tags (canonical, Open Graph, JSON-LD) come with SEOHead in feature/seo.
-const { title, description } = Astro.props;
-const site = await getSite();
-const pageTitle = title ? `${title} · ${site.name}` : site.name;
+type Props = SEOProps;
 ---
 
 <!doctype html>
@@ -21,8 +13,7 @@ const pageTitle = title ? `${title} · ${site.name}` : site.name;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{pageTitle}</title>
-    {description && <meta name="description" content={description} />}
+    <SEOHead {...Astro.props} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <!-- Applies the saved theme before first paint (no flash) and marks JS as available. -->

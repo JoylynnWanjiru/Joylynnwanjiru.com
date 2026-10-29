@@ -2,6 +2,8 @@
 import { Image } from 'astro:assets';
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { SITE_URL, absoluteUrl, socialImagePath } from '../../lib/seo';
+import { isoDate } from '../../lib/dates';
 
 export async function getStaticPaths() {
   // Drafts are previewable in `astro dev` only (BR-5).
@@ -11,16 +13,43 @@ export async function getStaticPaths() {
 
 const { post } = Astro.props;
 const { Content } = await render(post);
+const { data } = post;
+const path = `/writing/${post.id}/`;
+const description = data.seo?.description || data.description;
+
+const blogPosting = {
+  '@type': 'BlogPosting',
+  headline: data.title,
+  description,
+  datePublished: isoDate(data.date),
+  dateModified: isoDate(data.updated ?? data.date),
+  url: absoluteUrl(path),
+  mainEntityOfPage: absoluteUrl(path),
+  image: absoluteUrl(socialImagePath(path)),
+  author: { '@id': `${SITE_URL}/#person` },
+  publisher: { '@id': `${SITE_URL}/#person` },
+};
 ---
 
-<BaseLayout title={post.data.title} description={post.data.description}>
+<BaseLayout
+  title={data.seo?.title || data.title}
+  description={description}
+  canonical={data.seo?.canonical}
+  noindex={data.seo?.noindex}
+  type="article"
+  breadcrumbs={[
+    { name: 'Writing', path: '/writing/' },
+    { name: data.title, path },
+  ]}
+  schema={[blogPosting]}
+>
   <article class="container-site py-12">
     <div class="mx-auto max-w-article">
-      <h1 class="text-4xl">{post.data.title}</h1>
-      <p class="mt-4 text-lg text-muted">{post.data.description}</p>
+      <h1 class="text-4xl">{data.title}</h1>
+      <p class="mt-4 text-lg text-muted">{data.description}</p>
       {
-        post.data.cover && (
-          <Image src={post.data.cover} alt={post.data.coverAlt ?? ''} width={672} class="mt-8 h-auto w-full rounded-lg" />
+        data.cover && (
+          <Image src={data.cover} alt={data.coverAlt ?? ''} width={672} class="mt-8 h-auto w-full rounded-lg" />
         )
       }
       <div class="mt-8 text-post leading-[1.7]">

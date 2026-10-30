@@ -82,3 +82,22 @@ export async function jsonLdGraph(options: { breadcrumbs?: Breadcrumb[]; nodes?:
 
 /** JSON for a <script type="application/ld+json">, safe against "</script>" in content. */
 export const serializeJsonLd = (data: unknown) => JSON.stringify(data).replace(/</g, '\\u003c');
+
+/** CollectionPage + ItemList node for index pages (brief section 7). */
+export function collectionPageNode(name: string, path: string, items: { name: string; path: string }[]) {
+  return {
+    '@type': 'CollectionPage',
+    name,
+    url: absoluteUrl(path),
+    isPartOf: { '@id': `${SITE_URL}/#website` },
+    mainEntity: {
+      '@type': 'ItemList',
+      itemListElement: items.map((item, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        name: item.name,
+        url: absoluteUrl(item.path),
+      })),
+    },
+  };
+}

@@ -1,0 +1,62 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { SITE_URL, absoluteUrl, socialImagePath } from '../../lib/seo';
+import { formatDate, isoDate } from '../../lib/dates';
+import { stepNeighbours } from '../../lib/collections';
+
+export async function getStaticPaths() {
+  // Drafts are previewable in `astro dev` only (BR-5).
+  const steps = await getCollection('steps', ({ data }) => import.meta.env.DEV || !data.draft);
+  return steps.map((step) => ({ params: { slug: step.id }, props: { step, ...stepNeighbours(steps, step) } }));
+}
+
+const { step, previous, next } = Astro.props;
+const { Content } = await render(step);
+const { data } = step;
+const path = `/steps/${step.id}/`;
+const description = data.seo?.description || data.summary;
+
+const blogPosting = {
+  '@type': 'BlogPosting',
+  headline: data.title,
+  description,
+  datePublished: isoDate(data.date),
+  url: absoluteUrl(path),
+  mainEntityOfPage: absoluteUrl(path),
+  image: absoluteUrl(socialImagePath(path)),
+  author: { '@id': `${SITE_URL}/#person` },
+  publisher: { '@id': `${SITE_URL}/#person` },
+};
+---
+
+<BaseLayout
+  title={data.seo?.title || `Step ${data.number}: ${data.title}`}
+  description={description}
+  canonical={data.seo?.canonical}
+  noindex={data.seo?.noindex}
+  type="article"
+  breadcrumbs={[
+    { name: 'Steps', path: '/steps/' },
+    { name: `Step ${data.number}`, path },
+  ]}
+  schema={[blogPosting]}
+>
+  <article class="container-site py-12">
+    <div class="mx-auto max-w-article">
+      <p class="text-sm text-muted">
+        Step {data.number} · <time datetime={isoDate(data.date)}>{formatDate(data.date)}</time>
+      </p>
+      <h1 class="mt-2 text-4xl">{data.title}</h1>
+      <p class="mt-4 text-lg text-muted">{data.summary}</p>
+      <div class="mt-8 text-post leading-[1.7]">
+        <Content />
+      </div>
+      <nav aria-label="More steps" class="mt-12 flex justify-between gap-4 border-t border-line pt-6">
+        {previous ? <a href={`/steps/${previous.id}/`} rel="prev">← Step {previous.data.number}</a> : <span />}
+        <a href="/steps/">All steps</a>
+        {next ? <a href={`/steps/${next.id}/`} rel="next">Step {next.data.number} →</a> : <span />}
+      </nav>
+    </div>
+  </article>
+</BaseLayout>

@@ -1,0 +1,21 @@
+---
+import { writingPagePath } from '../lib/collections';
+
+interface Props {
+  page: number;
+  totalPages: number;
+}
+const { page, totalPages } = Astro.props;
+---
+
+{
+  totalPages > 1 && (
+    <nav aria-label="Pagination" class="mt-10 flex items-center justify-between gap-4 border-t border-line pt-6">
+      {page > 1 ? <a href={writingPagePath(page - 1)} rel="prev">← Newer posts</a> : <span />}
+      <p class="text-sm text-muted">
+        Page {page} of {totalPages}
+      </p>
+      {page < totalPages ? <a href={writingPagePath(page + 1)} rel="next">Older posts →</a> : <span />}
+    </nav>
+  )
+}

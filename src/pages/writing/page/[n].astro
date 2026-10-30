@@ -1,0 +1,15 @@
+---
+import WritingListing from '../../../components/WritingListing.astro';
+import { getPosts } from '../../../lib/entries';
+import { paginate } from '../../../lib/collections';
+
+// Pages 2 and up; page 1 is /writing/ (brief section 5: static pagination).
+export async function getStaticPaths() {
+  const { totalPages } = paginate(await getPosts(), 1);
+  return Array.from({ length: totalPages - 1 }, (_, i) => ({ params: { n: String(i + 2) } }));
+}
+
+const page = Number(Astro.params.n);
+---
+
+<WritingListing page={page} />

@@ -1,0 +1,38 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { seriesInUse, tagsInUse } from '../lib/collections';
+
+// Filter links are real static pages, not client-side filtering (brief sections 5 and 7).
+interface Props {
+  posts: CollectionEntry<'posts'>[];
+  /** Path of the current filter page, to mark it. */
+  current?: string;
+}
+const { posts, current } = Astro.props;
+const tags = tagsInUse(posts).map((tag) => ({ label: tag.label, path: `/writing/tags/${tag.value}/` }));
+const series = seriesInUse(posts).map((item) => ({ label: item.name, path: `/writing/series/${item.slug}/` }));
+const groups = [
+  { heading: 'Topics', links: tags },
+  { heading: 'Series', links: series },
+].filter((group) => group.links.length > 0);
+---
+
+{
+  groups.length > 0 && (
+    <nav aria-label="Filter writing" class="mt-8 space-y-3">
+      <a href="/writing/" class="pill" aria-current={current ? undefined : 'page'}>
+        All writing
+      </a>
+      {groups.map((group) => (
+        <div class="flex flex-wrap items-center gap-2">
+          <h2 class="mr-1 font-body text-sm font-semibold text-muted">{group.heading}</h2>
+          {group.links.map((link) => (
+            <a href={link.path} class="pill" aria-current={current === link.path ? 'page' : undefined}>
+              {link.label}
+            </a>
+          ))}
+        </div>
+      ))}
+    </nav>
+  )
+}

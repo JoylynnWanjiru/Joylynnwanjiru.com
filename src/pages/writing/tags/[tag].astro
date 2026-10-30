@@ -1,0 +1,40 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import PostList from '../../../components/PostList.astro';
+import WritingFilters from '../../../components/WritingFilters.astro';
+import { getPosts } from '../../../lib/entries';
+import { tagsInUse } from '../../../lib/collections';
+import { collectionPageNode } from '../../../lib/seo';
+
+// One static page per tag in use; unused tags get no page.
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  return tagsInUse(posts).map((tag) => ({
+    params: { tag: tag.value },
+    props: { label: tag.label, posts, tagged: posts.filter((post) => post.data.tags.includes(tag.value)) },
+  }));
+}
+
+const { label, posts, tagged } = Astro.props;
+const path = `/writing/tags/${Astro.params.tag}/`;
+const title = `Writing on ${label}`;
+---
+
+<BaseLayout
+  title={title}
+  breadcrumbs={[
+    { name: 'Writing', path: '/writing/' },
+    { name: label, path },
+  ]}
+  schema={[collectionPageNode(title, path, tagged.map((post) => ({ name: post.data.title, path: `/writing/${post.id}/` })))]}
+>
+  <div class="container-site py-12">
+    <div class="mx-auto max-w-article">
+      <h1 class="text-4xl">{title}</h1>
+      <WritingFilters posts={posts} current={path} />
+      <div class="mt-6">
+        <PostList posts={tagged} />
+      </div>
+    </div>
+  </div>
+</BaseLayout>

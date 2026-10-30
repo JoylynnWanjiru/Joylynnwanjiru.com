@@ -1,26 +1,167 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Todo from '../components/Todo.astro';
+import { getServices } from '../lib/entries';
 import { getSite } from '../lib/site';
+import { BUDGETS, LIMITS, TIMELINES, contactTopics } from '../lib/contact';
 import { MARKER } from '../../build/launch.mjs';
 
-const site = await getSite();
+const [site, services] = await Promise.all([getSite(), getServices()]);
+const topics = contactTopics(services);
 const path = '/contact/';
 const hasEmail = !site.email.includes(MARKER);
 ---
 
-<BaseLayout title="Contact" description="Get in touch with Joylynn Wanjiru." breadcrumbs={[{ name: 'Contact', path }]}>
+<BaseLayout
+  title="Contact"
+  description="Get in touch with Joylynn Wanjiru about automation and AI, websites and custom software, growth, the One Step Audit or renting Kadi."
+  breadcrumbs={[{ name: 'Contact', path }]}
+>
   <div class="container-site py-12">
     <div class="mx-auto max-w-article">
       <h1 class="text-4xl">Contact</h1>
-      <p class="mt-6"><Todo need="contact form (built in the next pull request)" /></p>
-      <p class="mt-8">
-        Email:
-        {hasEmail ? <a href={`mailto:${site.email}`}>{site.email}</a> : <Todo need="contact email" />}
-      </p>
-      <p class="mt-2 text-muted">
-        Based in Nairobi ({site.timeZone}): overlaps the full European workday and US East Coast mornings.
-      </p>
+      <p class="mt-4 text-lg text-muted">Tell me a little about what you need. I reply by email.</p>
+
+      {/* A real HTML form, so it works without JavaScript (brief 12.4). /api/contact
+          arrives in Phase 3 with Turnstile (BR-12), Resend and the BR-1 confirmation. */}
+      <form method="post" action="/api/contact" class="contact-form mt-10 space-y-6" data-contact-form>
+        <div class="grid gap-6 sm:grid-cols-2">
+          <div>
+            <label for="name">Name <span class="required" aria-hidden="true">*</span></label>
+            <input id="name" name="name" type="text" autocomplete="name" required maxlength={LIMITS.name} />
+          </div>
+          <div>
+            <label for="email">Email <span class="required" aria-hidden="true">*</span></label>
+            <input id="email" name="email" type="email" autocomplete="email" required maxlength={LIMITS.email} />
+          </div>
+        </div>
+
+        <div>
+          <label for="organisation">Organisation <span class="optional">(optional)</span></label>
+          <input id="organisation" name="organisation" type="text" autocomplete="organization" maxlength={LIMITS.organisation} />
+        </div>
+
+        <div>
+          <label for="topic">Topic <span class="required" aria-hidden="true">*</span></label>
+          <select id="topic" name="topic" required>
+            <option value="">Choose a topic</option>
+            {topics.map((topic) => <option value={topic.value}>{topic.label}</option>)}
+          </select>
+        </div>
+
+        <fieldset>
+          <legend>Budget <span class="required" aria-hidden="true">*</span></legend>
+          <div class="choices">
+            {
+              BUDGETS.map((budget, index) => (
+                <label class="choice">
+                  <input type="radio" name="budget" value={budget.value} required={index === 0} />
+                  {budget.label}
+                </label>
+              ))
+            }
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Timeline <span class="required" aria-hidden="true">*</span></legend>
+          <div class="choices">
+            {
+              TIMELINES.map((timeline, index) => (
+                <label class="choice">
+                  <input type="radio" name="timeline" value={timeline.value} required={index === 0} />
+                  {timeline.label}
+                </label>
+              ))
+            }
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Are you the person who decides on this project? <span class="required" aria-hidden="true">*</span></legend>
+          <div class="choices">
+            <label class="choice"><input type="radio" name="decisionMaker" value="yes" required /> Yes</label>
+            <label class="choice"><input type="radio" name="decisionMaker" value="no" /> No</label>
+          </div>
+        </fieldset>
+
+        <div>
+          <label for="website">Website <span class="optional">(optional)</span></label>
+          <input id="website" name="website" type="url" inputmode="url" autocomplete="url" placeholder="https://" maxlength={LIMITS.website} />
+        </div>
+
+        <div>
+          <label for="message">Message <span class="required" aria-hidden="true">*</span></label>
+          <textarea id="message" name="message" rows="6" required maxlength={LIMITS.message} aria-describedby="message-hint"></textarea>
+          <p id="message-hint" class="hint">Up to {LIMITS.message.toLocaleString('en-US')} characters.</p>
+        </div>
+
+        {/* Honeypot (brief 12.4): hidden from people, filled in by bots. */}
+        <div class="honeypot" aria-hidden="true">
+          <label for="nickname">Leave this empty</label>
+          <input id="nickname" name="nickname" type="text" tabindex="-1" autocomplete="off" />
+        </div>
+
+        <label class="choice">
+          <input type="checkbox" name="newsletter" value="yes" />
+          Also send me One Step: what I'm building, learning and figuring out, one step at a time.
+        </label>
+
+        <p class="text-sm text-muted"><span aria-hidden="true">*</span> Required</p>
+
+        <button type="submit" class="rounded-full bg-blue px-6 py-3 font-medium text-on-blue">Send message</button>
+      </form>
+
+      <section aria-labelledby="direct-heading" class="mt-14 border-t border-line pt-8">
+        <h2 id="direct-heading" class="text-xl">Prefer email?</h2>
+        <p class="mt-3">
+          {hasEmail ? <a href={`mailto:${site.email}`}>{site.email}</a> : <Todo need="contact email" />}
+        </p>
+        <p class="mt-2 text-muted">
+          Based in Nairobi ({site.timeZone}): overlaps the full European workday and US East Coast mornings.
+        </p>
+      </section>
     </div>
   </div>
 </BaseLayout>
+
+<script>
+  import { topicFromQuery } from '../lib/contact';
+
+  // Preselect the topic from ?topic= (for example /contact/?topic=kadi). Without
+  // JavaScript the visitor simply picks it.
+  const select = document.querySelector<HTMLSelectElement>('[data-contact-form] select[name="topic"]');
+  if (select) {
+    const topics = [...select.options].map((option) => ({ value: option.value, label: option.text }));
+    const topic = topicFromQuery(window.location.search, topics.filter((option) => option.value));
+    if (topic) select.value = topic;
+  }
+</script>
+
+<style>
+  .contact-form label,
+  .contact-form legend { display: block; font-weight: 500; color: var(--ink); }
+  .contact-form input:not([type='radio'], [type='checkbox']),
+  .contact-form select,
+  .contact-form textarea {
+    margin-top: 0.375rem;
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 0.5rem;
+    background: var(--bg);
+    color: var(--ink);
+    padding: 0.625rem 0.75rem;
+  }
+  .contact-form input:hover,
+  .contact-form select:hover,
+  .contact-form textarea:hover { border-color: var(--muted); }
+  .contact-form .choices { margin-top: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; }
+  .contact-form .choice { display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 400; }
+  .contact-form input[type='radio'],
+  .contact-form input[type='checkbox'] { accent-color: var(--blue); width: 1.125rem; height: 1.125rem; }
+  .contact-form .required { color: var(--muted); }
+  .contact-form .optional,
+  .contact-form .hint { font-weight: 400; color: var(--muted); font-size: 0.875rem; }
+  .contact-form .hint { margin-top: 0.25rem; }
+  .honeypot { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+</style>

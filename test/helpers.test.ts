@@ -3,6 +3,7 @@ import { formatDate, isoDate } from '../src/lib/dates';
 import { countWords, readingTime } from '../src/lib/reading-time';
 import { slugify } from '../src/lib/slug';
 import { bookingUrl, contactPath, formatPrice } from '../src/lib/offer';
+import { contactTopics, topicFromQuery } from '../src/lib/contact';
 import { TAG_VALUES } from '../src/content/tags';
 
 describe('slugify', () => {
@@ -71,5 +72,23 @@ describe('offer helpers', () => {
   it('preselects a contact topic', () => {
     expect(contactPath()).toBe('/contact/');
     expect(contactPath('kadi')).toBe('/contact/?topic=kadi');
+  });
+});
+
+describe('contact form options', () => {
+  const services = [
+    { id: 'automation-ai', data: { name: 'Automation & AI' } },
+    { id: 'growth-discoverability', data: { name: 'Growth & Discoverability' } },
+  ];
+  const topics = contactTopics(services);
+
+  it('lists the services, then the audit, Kadi and something else', () => {
+    expect(topics.map((topic) => topic.value)).toEqual(['automation-ai', 'growth-discoverability', 'audit', 'kadi', 'other']);
+  });
+
+  it('preselects only a known topic from ?topic=', () => {
+    expect(topicFromQuery('?topic=kadi', topics)).toBe('kadi');
+    expect(topicFromQuery('?topic=nope', topics)).toBe('');
+    expect(topicFromQuery('', topics)).toBe('');
   });
 });

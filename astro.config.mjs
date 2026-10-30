@@ -31,6 +31,9 @@ export default defineConfig({
   adapter: isDev ? undefined : cloudflare({ imageService: 'compile', prerenderEnvironment: 'node' }),
   // No Astro sessions; stops the adapter provisioning a KV namespace.
   session: false,
+  // Inline the site CSS (about 5 KB) so it does not block first paint with an
+  // extra request; it sits just above the default 4 KB inline limit (brief section 7, LCP).
+  build: { inlineStylesheets: 'always' },
   integrations: [
     react(),
     mdx(),

@@ -1,6 +1,7 @@
 ---
 // Visible placeholder for content Joylynn has not provided yet (brief section 0, rule 1).
 // `pnpm check:launch` lists every usage; add `blocker` when it blocks launch (section 10).
+// Body font, not the code font: placeholders sit on most pages and should not load an extra font.
 interface Props {
   need: string;
   blocker?: boolean;
@@ -8,6 +9,6 @@ interface Props {
 const { need } = Astro.props;
 ---
 
-<span class="rounded border border-dashed border-pink-text px-1.5 py-0.5 font-code text-sm text-pink-text">
+<span class="rounded border border-dashed border-pink-text px-1.5 py-0.5 text-sm text-pink-text">
   TODO(joylynn): {need}
 </span>

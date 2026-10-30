@@ -111,6 +111,23 @@
   }
 }
 
+/* Pagefind search UI (brief section 3 tokens). Its components reset inherited styles,
+   so these variables are the only way in; they follow the theme because they read the tokens. */
+:root {
+  --pf-text: var(--ink);
+  --pf-text-secondary: var(--muted);
+  --pf-text-muted: var(--muted);
+  --pf-background: var(--bg);
+  --pf-border: var(--line);
+  --pf-border-focus: var(--blue);
+  --pf-hover: var(--soft);
+  --pf-skeleton: var(--soft);
+  --pf-skeleton-shine: var(--line);
+  --pf-mark: var(--ink);
+  --pf-outline-focus: var(--blue);
+  --pf-font: var(--font-body);
+}
+
 @layer components {
   /* Page container: 72 rem max, 16 px gutters on mobile. */
   .container-site {

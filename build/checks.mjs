@@ -102,7 +102,7 @@ export function inlineScriptHashes(html) {
 export function contentSecurityPolicy(scriptHashes) {
   return [
     "default-src 'self'",
-    `script-src 'self' ${[...new Set(scriptHashes)].sort().join(' ')} https://challenges.cloudflare.com https://static.cloudflareinsights.com`.replace(/\s+/g, ' '),
+    `script-src 'self' 'wasm-unsafe-eval' ${[...new Set(scriptHashes)].sort().join(' ')} https://challenges.cloudflare.com https://static.cloudflareinsights.com`.replace(/\s+/g, ' '),
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data:",
     "font-src 'self'",

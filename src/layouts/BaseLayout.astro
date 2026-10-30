@@ -6,6 +6,7 @@ import SEOHead, { type Props as SEOProps } from '../components/SEOHead.astro';
 import '../styles/global.css';
 
 type Props = SEOProps;
+const { noindex } = Astro.props;
 ---
 
 <!doctype html>
@@ -32,7 +33,7 @@ type Props = SEOProps;
   <body class="bg-bg text-ink">
     <a href="#main" class="skip-link">Skip to content</a>
     <Header />
-    <main id="main" class="flex-1">
+    <main id="main" class="flex-1" data-pagefind-body={noindex ? undefined : ""}>
       <slot />
     </main>
     <Footer />

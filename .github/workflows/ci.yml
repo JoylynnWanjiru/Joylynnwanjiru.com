@@ -95,6 +95,9 @@ jobs:
             sleep 20
           done
           alias=$(echo "$BRANCH" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-+|-+$//g')
+          # A DNS label holds 63 characters, so Cloudflare cuts the alias to fit
+          # "<alias>-joylynnwanjiru": 48 characters at most.
+          alias=$(echo "${alias:0:48}" | sed -E 's/-+$//')
           base="https://${alias}-joylynnwanjiru.joylynnwanjiru-com.workers.dev"
           # Every published URL (published-urls.json) is tested.
           urls=$(jq -r --arg base "$base" '.urls[] | $base + .' published-urls.json)

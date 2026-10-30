@@ -15,6 +15,7 @@ import {
 } from '../build/checks.mjs';
 import { collections } from '../src/content.config';
 import { isPublished } from '../src/lib/seo';
+import { confidentialWithLinks } from '../src/lib/collections';
 
 const SITE = 'https://joylynnwanjiru.com';
 type Schema = z.ZodType;
@@ -22,6 +23,18 @@ const schemaOf = (name: keyof typeof collections) => {
   const schema = (collections[name] as unknown as { schema: Schema | ((c: { image: () => Schema }) => Schema) }).schema;
   return typeof schema === 'function' ? schema({ image: () => z.string() }) : schema;
 };
+
+describe('BR-4: confidential projects never show links', () => {
+  it('lists confidential projects that have links filled in', () => {
+    const projects = [
+      { id: 'open', data: { confidential: false, links: { live: 'https://a.example' } } },
+      { id: 'secret', data: { confidential: true, links: { repo: 'https://b.example' } } },
+      { id: 'clean', data: { confidential: true, links: { live: null, repo: null } } },
+      { id: 'none', data: { confidential: true } },
+    ];
+    expect(confidentialWithLinks(projects)).toEqual(['secret']);
+  });
+});
 
 describe('BR-5: drafts never appear in production output', () => {
   it('treats drafts as unpublished', () => {

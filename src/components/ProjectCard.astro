@@ -1,0 +1,45 @@
+---
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  project: CollectionEntry<'projects'>;
+  services: CollectionEntry<'services'>[];
+}
+const { project, services } = Astro.props;
+const { data } = project;
+const tagged = services.filter((service) => data.services.some((ref) => ref.id === service.id));
+---
+
+<article class="project-card flex h-full flex-col overflow-hidden rounded-xl border border-line bg-bg">
+  {
+    data.cover ? (
+      <Image src={data.cover} alt={data.coverAlt ?? ''} width={640} class="aspect-[16/9] h-auto w-full object-cover" />
+    ) : (
+      // Neutral branded cover until screenshots arrive (brief section 9, phase 2).
+      <div class="placeholder-cover flex aspect-[16/9] items-end p-5" aria-hidden="true">
+        <span class="font-heading text-2xl font-bold text-ink">{data.title.split(':')[0]}</span>
+      </div>
+    )
+  }
+  <div class="flex flex-1 flex-col p-5">
+    <h3 class="text-lg">
+      <a href={`/work/${project.id}/`} class="text-ink no-underline hover:text-blue">{data.title}</a>
+    </h3>
+    <p class="mt-2 flex-1 text-muted">{data.oneLiner}</p>
+    {
+      tagged.length > 0 && (
+        <ul class="mt-4 flex flex-wrap gap-2" role="list" aria-label="Services">
+          {tagged.map((service) => (
+            <li class="pill">{service.data.name}</li>
+          ))}
+        </ul>
+      )
+    }
+  </div>
+</article>
+
+<style>
+  .project-card:hover { border-color: var(--tint-line); }
+  .placeholder-cover { background: var(--glow), var(--wash); }
+</style>

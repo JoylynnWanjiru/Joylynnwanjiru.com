@@ -49,3 +49,12 @@ export function stepNeighbours<T extends { data: { number: number } }>(steps: T[
   const index = ordered.indexOf(current);
   return { previous: ordered[index - 1], next: ordered[index + 1] };
 }
+
+/** Ids of confidential projects that still have links filled in. The links never render (BR-4); the build warns. */
+export function confidentialWithLinks(
+  projects: { id: string; data: { confidential: boolean; links?: { live?: string | null; repo?: string | null } } }[],
+): string[] {
+  return projects
+    .filter(({ data }) => data.confidential && (data.links?.live || data.links?.repo))
+    .map(({ id }) => id);
+}

@@ -1,0 +1,187 @@
+---
+import { Image } from 'astro:assets';
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { confidentialWithLinks } from '../../lib/collections';
+import { getServices, getTestimonials } from '../../lib/entries';
+import { SITE_URL, absoluteUrl, socialImagePath } from '../../lib/seo';
+
+export async function getStaticPaths() {
+  // Drafts are previewable in `astro dev` only (BR-5).
+  const projects = await getCollection('projects', ({ data }) => import.meta.env.DEV || !data.draft);
+  for (const id of confidentialWithLinks(projects)) {
+    console.warn(`[BR-4] Project "${id}" is confidential but has links filled in. They will not be shown.`);
+  }
+  return projects.map((project) => ({ params: { slug: project.id }, props: { project } }));
+}
+
+const { project } = Astro.props;
+const { Content } = await render(project);
+const { data } = project;
+const path = `/work/${project.id}/`;
+const description = data.seo?.description || data.oneLiner;
+
+const services = (await getServices()).filter((service) => data.services.some((ref) => ref.id === service.id));
+const testimonial = (await getTestimonials()).find((item) => item.data.project?.id === project.id);
+const links = [
+  { label: 'Live site', url: data.links?.live },
+  { label: 'Repository', url: data.links?.repo },
+].filter((link): link is { label: string; url: string } => !!link.url);
+
+const meta = [
+  { term: 'Year', value: data.year ? String(data.year) : null },
+  { term: 'Role', value: data.role },
+  { term: 'Context', value: data.context },
+  { term: 'Stack', value: data.stack.join(', ') || null },
+].filter((item) => item.value);
+
+const creativeWork = {
+  '@type': 'CreativeWork',
+  name: data.title,
+  description,
+  url: absoluteUrl(path),
+  image: absoluteUrl(socialImagePath(path)),
+  creator: { '@id': `${SITE_URL}/#person` },
+  ...(data.year && { dateCreated: String(data.year) }),
+  ...(data.stack.length > 0 && { keywords: data.stack.join(', ') }),
+};
+---
+
+<BaseLayout
+  title={data.seo?.title || data.title}
+  description={description}
+  canonical={data.seo?.canonical}
+  noindex={data.seo?.noindex}
+  type="article"
+  breadcrumbs={[
+    { name: 'Work', path: '/work/' },
+    { name: data.title, path },
+  ]}
+  schema={[creativeWork]}
+>
+  <article class="container-site py-12">
+    <div class="mx-auto max-w-article">
+      <h1 class="text-4xl">{data.title}</h1>
+      <p class="mt-4 text-xl text-muted">{data.oneLiner}</p>
+
+      <dl class="mt-8 grid gap-x-6 gap-y-3 border-y border-line py-5 text-sm sm:grid-cols-[auto_1fr]">
+        {
+          meta.map((item) => (
+            <>
+              <dt class="font-semibold text-ink">{item.term}</dt>
+              <dd class="text-muted">{item.value}</dd>
+            </>
+          ))
+        }
+      </dl>
+    </div>
+
+    <div class="mx-auto mt-10 max-w-4xl">
+      {
+        data.cover ? (
+          <Image src={data.cover} alt={data.coverAlt ?? ''} width={896} class="h-auto w-full rounded-xl" />
+        ) : (
+          <div class="placeholder-cover flex aspect-[16/9] items-end rounded-xl p-8" aria-hidden="true">
+            <span class="font-heading text-4xl font-bold text-ink">{data.title.split(':')[0]}</span>
+          </div>
+        )
+      }
+    </div>
+
+    <div class="mx-auto mt-10 max-w-article">
+      <div class="case-body text-post leading-[1.7]">
+        <Content />
+      </div>
+
+      {
+        data.gallery.length > 0 && (
+          <div class="mt-10 grid gap-6">
+            {data.gallery.map((item) => (
+              <Image src={item.image} alt={item.alt} width={672} class="h-auto w-full rounded-lg" />
+            ))}
+          </div>
+        )
+      }
+
+      {
+        data.team.length > 0 && (
+          <section aria-labelledby="team-heading" class="mt-12">
+            <h2 id="team-heading" class="text-xl">Team</h2>
+            <ul class="mt-3 space-y-1" role="list">
+              {data.team.map((member) => (
+                <li>
+                  {member.link ? (
+                    <a href={member.link} target="_blank" rel="noopener noreferrer">
+                      {member.name}
+                    </a>
+                  ) : (
+                    member.name
+                  )}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )
+      }
+
+      <section aria-labelledby="links-heading" class="mt-10">
+        <h2 id="links-heading" class="text-xl">Links</h2>
+        {
+          data.confidential ? (
+            <p class="mt-3 text-muted">Private project: details available on request.</p>
+          ) : links.length > 0 ? (
+            <ul class="mt-3 flex flex-wrap gap-4" role="list">
+              {links.map((link) => (
+                <li>
+                  <a href={link.url} target="_blank" rel="noopener noreferrer">
+                    {link.label} ↗
+                  </a>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p class="mt-3 text-muted">No public links for this project.</p>
+          )
+        }
+      </section>
+
+      {
+        testimonial && (
+          <figure class="mt-12 rounded-xl border border-tint-line bg-wash p-6">
+            <blockquote class="text-lg text-ink">“{testimonial.data.quote}”</blockquote>
+            <figcaption class="mt-4 text-sm text-muted">
+              {testimonial.data.link ? <a href={testimonial.data.link}>{testimonial.data.name}</a> : testimonial.data.name}
+              {[testimonial.data.role, testimonial.data.organisation].filter(Boolean).map((part) => `, ${part}`)}
+            </figcaption>
+          </figure>
+        )
+      }
+
+      {
+        services.length > 0 && (
+          <aside aria-label="Related services" class="mt-12 border-t border-line pt-8">
+            <p class="font-heading text-xl font-semibold">Need something like this?</p>
+            <ul class="mt-4 flex flex-wrap gap-3" role="list">
+              {services.map((service) => (
+                <li>
+                  <a
+                    href={`/work-with-me/${service.id}/`}
+                    class="inline-block rounded-full bg-blue px-5 py-2.5 font-medium text-on-blue no-underline"
+                  >
+                    {service.data.buttonLabel}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </aside>
+        )
+      }
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .placeholder-cover { background: var(--glow), var(--wash); }
+  .case-body :global(h2) { margin-top: 2.5rem; font-size: var(--text-2xl); }
+  .case-body :global(p) { margin-top: 1rem; }
+</style>

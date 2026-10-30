@@ -47,4 +47,4 @@ This repo builds joylynnwanjiru.com. **`BUILD_BRIEF.md` is the single source of 
 - `packageManager` in `package.json` pins pnpm; without it Workers Builds uses an old pnpm that rejects our settings-only `pnpm-workspace.yaml`. Bump it and the lockfile together.
 - The build copies `.env` into `dist/server/.dev.vars`. It is not uploaded on deploy (checked with a dry run), and `dist/` is gitignored.
 - GitHub App redirect URIs: `127.0.0.1:4321` for local and the workers.dev URL. Add the real domain's callback when it goes live.
-- Branch protection is not available on a free account with a private repo; brief 12.5 assumes `main` is protected (open decision for Joylynn).
+- Branch protection is not available on a free account with a private repo. Joylynn accepted `main` unprotected on 30 October 2026 (brief 11 and 12.5).

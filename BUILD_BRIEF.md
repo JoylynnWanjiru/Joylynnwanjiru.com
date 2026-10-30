@@ -523,6 +523,7 @@ Each phase ends with its **definition of done** passing and a preview deployment
 - Free 20-minute call for fit only, behind a qualifying form
 - Kadi is a rentable product and gets its own card
 - Photography comes later; i18n is not used
+- `main` stays unprotected (private repo on a free GitHub account), accepted 30 October 2026
 
 ---
 
@@ -625,7 +626,7 @@ Audit credit: valid 30 days from plan delivery; after that the full build price 
 ### 12.5 Security and privacy
 
 - **Secrets** live only in Cloudflare environment variables (typed through `astro:env`); `.env.example` lists names, never values.
-- **Editor access:** editors are GitHub collaborators with two-factor authentication required. `main` is protected; changes from anyone but Joylynn arrive as pull requests she approves. VERIFY that Keystatic's GitHub mode works with branch protection (it supports editing on branches). Removing access means removing the collaborator.
+- **Editor access:** editors are GitHub collaborators with two-factor authentication required. `main` is not protected: branch protection is not available for a private repo on a free GitHub account, and Joylynn accepted this on 30 October 2026. Other editors should work on a branch in Keystatic and open a pull request for Joylynn to approve. Removing access means removing the collaborator.
 - The `/keystatic` route is `noindex` and disallowed in `robots.txt`.
 - **Personal data:** the site stores no personal data itself. Contact messages go only to Joylynn's inbox; subscribers live in Beehiiv; bookings in Cal.com; payments with the payment provider. Server logs never contain email addresses or message text.
 - **Privacy page** (`/privacy`, linked in the footer): what is collected, by which service, why, how long it is kept, and how to ask for deletion. It matters for visitors in Europe and under Kenya's Data Protection Act. Joylynn should have it reviewed; this brief is not legal advice.

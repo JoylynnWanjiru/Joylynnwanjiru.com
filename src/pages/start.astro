@@ -1,0 +1,102 @@
+---
+import { getEntries, getEntry } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PostList from '../components/PostList.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import Todo from '../components/Todo.astro';
+import { getServices, getSteps, visible } from '../lib/entries';
+import { formatDate, isoDate } from '../lib/dates';
+
+const page = await getEntry('start', 'start');
+if (!page) throw new Error('Missing Start here content: src/content/pages/start.yaml');
+const { data } = page;
+const path = '/start/';
+
+// Editor picks, minus any draft (BR-5): a picked draft simply drops out in production.
+const [posts, caseStudy, services, steps] = await Promise.all([
+  getEntries(data.bestPosts).then((entries) => entries.filter(visible)),
+  data.bestCaseStudy ? getEntry(data.bestCaseStudy) : undefined,
+  getServices(),
+  getSteps(),
+]);
+const project = caseStudy && visible(caseStudy) ? caseStudy : undefined;
+const latestStep = steps[0];
+
+const primary = 'inline-block rounded-full bg-blue px-5 py-2.5 font-medium text-on-blue no-underline';
+const secondary = 'inline-block rounded-full border border-line px-5 py-2.5 font-medium text-ink no-underline hover:border-blue';
+---
+
+<BaseLayout
+  title={data.seo?.title || 'Start here'}
+  description={data.seo?.description ||
+    'New here? Who Joylynn Wanjiru is, her best writing, a case study and the Steps log, in one place.'}
+  canonical={data.seo?.canonical}
+  noindex={data.seo?.noindex}
+  breadcrumbs={[{ name: 'Start here', path }]}
+>
+  <div class="container-site py-12">
+    <div class="mx-auto max-w-article">
+      <h1 class="text-4xl">Start here</h1>
+      <p class="mt-6 text-lg">{data.intro}</p>
+      <p class="mt-4"><a href="/about/">More about me →</a></p>
+
+      <section aria-labelledby="posts-heading" class="mt-14">
+        <h2 id="posts-heading" class="text-2xl">Three posts to read first</h2>
+        <div class="mt-4">
+          {
+            data.bestPosts.length === 0 ? (
+              <Todo need="pick up to three best posts (Keystatic: Pages → Start here)" />
+            ) : (
+              <PostList posts={posts} empty="These posts are on their way." />
+            )
+          }
+        </div>
+        <p class="mt-4"><a href="/writing/">All writing →</a></p>
+      </section>
+    </div>
+
+    <section aria-labelledby="case-heading" class="mx-auto mt-14 max-w-article">
+      <h2 id="case-heading" class="text-2xl">The case study to start with</h2>
+      <div class="mt-6">
+        {
+          project ? (
+            <ProjectCard project={project} services={services} />
+          ) : data.bestCaseStudy ? (
+            <p class="text-muted">This case study is on its way.</p>
+          ) : (
+            <Todo need="pick the best case study (Keystatic: Pages → Start here)" />
+          )
+        }
+      </div>
+      <p class="mt-4"><a href="/work/">All work →</a></p>
+    </section>
+
+    <div class="mx-auto max-w-article">
+      <section aria-labelledby="steps-heading" class="mt-14">
+        <h2 id="steps-heading" class="text-2xl">The Steps log</h2>
+        <p class="mt-4">
+          Steps is a short weekly log of what I'm learning, one step at a time. Each entry is numbered, so you can
+          start at Step 1 and follow along.
+        </p>
+        {
+          latestStep && (
+            <p class="mt-4 text-muted">
+              Latest: <a href={`/steps/${latestStep.id}/`}>Step {latestStep.data.number}: {latestStep.data.title}</a>
+              {' · '}
+              <time datetime={isoDate(latestStep.data.date)}>{formatDate(latestStep.data.date)}</time>
+            </p>
+          )
+        }
+        <p class="mt-4"><a href="/steps/">Read the Steps log →</a></p>
+      </section>
+
+      <section aria-labelledby="next-heading" class="mt-16 border-t border-line pt-10">
+        <h2 id="next-heading" class="text-2xl">Where to next</h2>
+        <div class="mt-6 flex flex-wrap gap-3">
+          <a href="#newsletter" class={primary}>Subscribe to One Step</a>
+          <a href="/work-with-me/" class={secondary}>Work with me</a>
+        </div>
+      </section>
+    </div>
+  </div>
+</BaseLayout>

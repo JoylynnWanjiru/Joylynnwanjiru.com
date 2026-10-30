@@ -1,0 +1,9 @@
+# Links lychee skips (one regular expression per line).
+# Phase 2 pages: the header and home page already link to them. Remove each line
+# once its page is built, so the link check covers it again.
+/dist/client/start$
+/dist/client/writing$
+/dist/client/steps$
+/dist/client/work$
+/dist/client/about$
+/dist/client/work-with-me$

@@ -1,0 +1,113 @@
+# CI for every pull request and for main (brief section 9, phase 1).
+# Deploys are separate: Cloudflare Workers Builds builds and deploys each branch.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Launch blockers are listed but do not fail CI until Phase 4 (Joylynn's decision,
+  # 30 October 2026). Set to 'true' when Phase 4 starts.
+  LAUNCH_STRICT: 'false'
+
+jobs:
+  checks:
+    name: Build and checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      # Reads the pnpm version from "packageManager" in package.json.
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Type check
+        run: pnpm check
+      - name: Lint
+        run: pnpm lint
+      - name: Tests
+        run: pnpm test
+      - name: Large source images (warning only)
+        run: pnpm check:images
+      - name: Build
+        run: pnpm build
+      - name: Published URLs still reachable (BR-11)
+        run: pnpm urls:check
+
+      # Internal links only (offline): external sites are checked monthly by
+      # link-check.yml, so a flaky third party never blocks a pull request.
+      - name: Internal link check
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: >-
+            --offline --no-progress --include-fragments
+            --root-dir "${{ github.workspace }}/dist/client"
+            'dist/client/**/*.html'
+          fail: true
+
+      - name: Launch blockers (brief section 10)
+        run: |
+          if [ "$LAUNCH_STRICT" = 'true' ]; then
+            pnpm check:launch
+          else
+            pnpm check:launch --report-only
+          fi
+
+  lighthouse:
+    name: Lighthouse on the preview
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: read
+    steps:
+      - uses: actions/checkout@v7
+
+      # Workers Builds reports a check run on the commit; its preview URL follows
+      # the branch name. Wait until this commit's preview is deployed.
+      - name: Wait for the Cloudflare preview
+        id: preview
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+          BRANCH: ${{ github.head_ref }}
+        run: |
+          for attempt in $(seq 1 60); do
+            result=$(gh api "repos/${{ github.repository }}/commits/$SHA/check-runs?check_name=Workers%20Builds:%20joylynnwanjiru" \
+              -q '.check_runs[0] | "\(.status) \(.conclusion)"')
+            case "$result" in
+              'completed success') break ;;
+              completed*) echo "::error::The Cloudflare preview build did not succeed ($result)."; exit 1 ;;
+            esac
+            if [ "$attempt" = 60 ]; then echo '::error::Timed out waiting for the Cloudflare preview.'; exit 1; fi
+            sleep 20
+          done
+          alias=$(echo "$BRANCH" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-+|-+$//g')
+          base="https://${alias}-joylynnwanjiru.joylynnwanjiru-com.workers.dev"
+          # Every published URL (published-urls.json) is tested.
+          urls=$(jq -r --arg base "$base" '.urls[] | $base + .' published-urls.json)
+          {
+            echo 'urls<<EOF'
+            echo "$urls"
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+          echo "Testing: $urls"
+
+      - name: Lighthouse (mobile)
+        uses: treosh/lighthouse-ci-action@12.6.2
+        with:
+          urls: ${{ steps.preview.outputs.urls }}
+          configPath: ./lighthouserc.json
+          uploadArtifacts: true

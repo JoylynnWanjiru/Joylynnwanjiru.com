@@ -13,6 +13,9 @@
     "astro": "astro",
     "test": "vitest run",
     "check": "astro check",
+    "lint": "eslint .",
+    "check:launch": "node scripts/check-launch.mjs",
+    "check:images": "node scripts/check-images.mjs",
     "urls:check": "node scripts/published-urls.mjs --check",
     "urls:update": "node scripts/published-urls.mjs --update"
   },
@@ -38,10 +41,15 @@
   },
   "devDependencies": {
     "@astrojs/check": "0.9.12",
+    "@eslint/js": "10.0.1",
     "@fontsource/inter": "5.3.0",
     "@fontsource/plus-jakarta-sans": "5.3.0",
     "@types/node": "24.19.2",
+    "eslint": "10.13.0",
+    "eslint-plugin-astro": "3.2.1",
+    "globals": "17.13.0",
     "typescript": "6.0.3",
+    "typescript-eslint": "8.72.1",
     "vitest": "5.0.5",
     "wrangler": "4.152.0"
   }

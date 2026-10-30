@@ -101,6 +101,9 @@
   /* Long URLs and inline code break instead of widening the page at 360 px (brief section 3). */
   body { overflow-wrap: break-word; }
   a { color: var(--blue); text-underline-offset: 0.2em; }
+  /* Links inside running text need more than colour to stand out (WCAG 1.4.1). Covers
+     Markdown bodies; styled links set their own decoration. */
+  :where(p, li, dd, td, blockquote) > a:not([class]) { text-decoration: underline; }
   :focus-visible {
     outline: 2px solid var(--blue);
     outline-offset: 3px;

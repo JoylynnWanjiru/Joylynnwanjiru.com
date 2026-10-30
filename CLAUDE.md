@@ -5,7 +5,7 @@ This repo builds joylynnwanjiru.com. **`BUILD_BRIEF.md` is the single source of 
 ## How we work
 
 - Build **one phase at a time**, in the order of brief section 9. Do not start the next phase until Joylynn approves the phase report for the current one.
-- Before writing code for a phase, give Joylynn a short plan and wait for approval.
+- Within a phase, keep building without asking for a go-ahead on each step, as long as the work fits the brief and nothing conflicts (Joylynn, 30 October 2026). Share the plan, then proceed. Still stop for **ASK JOYLYNN** items, new dependencies (rule 3), destructive git operations and real conflicts.
 - **VERIFY** in the brief: check the current official docs first, tell Joylynn what you found, then rely on it.
 - **ASK JOYLYNN** in the brief: stop and ask. Never guess the answer.
 - End every phase with a phase report: what was built, the definition of done item by item (pass/fail with evidence, including Lighthouse scores), VERIFY findings and decisions, open `TODO(joylynn)` items, and what Joylynn must provide next.

@@ -10,7 +10,7 @@ const WIDTH = 1200;
 const HEIGHT = 630;
 
 // Light-theme colour tokens from brief section 3.
-const colors = { ink: '#16213A', muted: '#5A6577', wash: '#FEF4F8', blue: '#2B5CE6', pink: '#E8468D', pinkText: '#C92F72' };
+const colors = { ink: '#16213A', muted: '#5A6577', wash: '#FEF4F8', blue: '#2B5CE6', pink: '#E8468D', pinkText: '#C42D6F' };
 
 const fontFile = (pkg: string, file: string) => readFile(join(process.cwd(), 'node_modules', pkg, 'files', file));
 

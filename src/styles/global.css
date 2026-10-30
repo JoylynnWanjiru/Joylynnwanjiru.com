@@ -10,7 +10,7 @@
   --line:#E7EAF1;
   --blue:#2B5CE6;        /* primary accent: links, buttons, focus */
   --pink:#E8468D;        /* secondary spark: large type, decoration only */
-  --pink-text:#C92F72;   /* pink words at body size (5.08:1 on white) */
+  --pink-text:#C42D6F;   /* pink words at body size (5.31:1 on white, 4.57:1 on --tint) */
   --on-blue:#FFFFFF;     /* text on blue buttons */
   --wash:#FEF4F8;        /* 6% pink into white: hero, newsletter band */
   --tint:#FCE9F1;        /* 12%: pills, tags, badges, card hover */

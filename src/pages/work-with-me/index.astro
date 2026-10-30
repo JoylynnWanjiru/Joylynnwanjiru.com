@@ -1,0 +1,164 @@
+---
+import { getEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Faq from '../../components/Faq.astro';
+import Testimonial from '../../components/Testimonial.astro';
+import Todo from '../../components/Todo.astro';
+import { getServices, getTestimonials } from '../../lib/entries';
+import { FREE_CALL_FILTER, bookingUrl, contactPath, formatPrice } from '../../lib/offer';
+import { faqPageNode, serviceNode } from '../../lib/seo';
+import { getSite } from '../../lib/site';
+
+const [site, page, services, testimonials] = await Promise.all([
+  getSite(),
+  getEntry('workWithMe', 'work-with-me'),
+  getServices(),
+  getTestimonials(),
+]);
+const faq = page?.data.faq ?? [];
+const path = '/work-with-me/';
+const price = (amount: number) => formatPrice(amount, site.currency);
+// Prices come from site settings only (BR-7).
+const auditLabel = `Book an audit · ${price(site.auditPrice)}`;
+const auditLink = (button: string) => (site.bookingLinks.audit ? bookingUrl(site.bookingLinks.audit, button) : null);
+const auditHref = auditLink('audit-card');
+const auditHrefContact = auditLink('get-in-touch');
+
+const primary = 'inline-block rounded-full bg-blue px-5 py-2.5 font-medium text-on-blue no-underline';
+const secondary = 'inline-block rounded-full border border-line px-5 py-2.5 font-medium text-ink no-underline hover:border-blue';
+---
+
+<BaseLayout
+  title={page?.data.seo?.title || 'Work with me'}
+  description={page?.data.seo?.description ||
+    'Software and growth for businesses that want results they can trust: automation and AI, websites and custom software, and growth.'}
+  canonical={page?.data.seo?.canonical}
+  noindex={page?.data.seo?.noindex}
+  breadcrumbs={[{ name: 'Work with me', path }]}
+  schema={[
+    ...services.map((service) => serviceNode(service.data.name, service.data.oneLiner, `/work-with-me/${service.id}/`)),
+    ...faqPageNode(faq),
+  ]}
+>
+  <header class="wash-band">
+    <div class="container-site py-16">
+      <h1 class="text-4xl">How I can help</h1>
+      <p class="mt-4 max-w-article text-lg text-muted">
+        Software and growth for businesses that want results they can trust.
+      </p>
+    </div>
+  </header>
+
+  <div class="container-site py-12">
+    <section aria-labelledby="services-heading">
+      <h2 id="services-heading" class="sr-only">Services</h2>
+      <ul class="grid gap-6 md:grid-cols-3" role="list">
+        {
+          services.map((service) => (
+            <li class="service-card flex flex-col rounded-xl border border-line bg-bg p-6">
+              <h3 class="text-xl">
+                <a href={`/work-with-me/${service.id}/`} class="text-ink no-underline hover:text-blue">
+                  {service.data.name}
+                </a>
+              </h3>
+              <p class="mt-2 flex-1 text-muted">{service.data.oneLiner}</p>
+              {service.data.includes.length > 0 && (
+                <ul class="mt-4 flex flex-wrap gap-2" role="list" aria-label="Includes">
+                  {service.data.includes.map((item) => (
+                    <li class="pill">{item}</li>
+                  ))}
+                </ul>
+              )}
+              <p class="mt-6">
+                <a href={contactPath(service.id)} class={primary} data-event={`service_click_${service.id}`}>
+                  {service.data.buttonLabel}
+                </a>
+              </p>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <section aria-labelledby="audit-heading" class="mt-16 rounded-xl border border-tint-line bg-bg p-6 md:p-8">
+      <p class="text-sm font-medium text-pink-text">Start here</p>
+      <h2 id="audit-heading" class="mt-1 text-2xl">One Step Audit · {price(site.auditPrice)}</h2>
+      <p class="mt-3 text-lg text-ink">A clear plan for your next step, before anything is built.</p>
+      <p class="mt-3 max-w-article text-muted">
+        A short questionnaire, a 60-minute call reviewing your website, tools and workflows, and a written plan within 3
+        working days: what to fix, what to automate, what to leave alone, and an estimate for each step.
+      </p>
+      <p class="mt-3 max-w-article text-muted">The fee counts toward any build you start with me within 30 days.</p>
+      <p class="mt-6">
+        {
+          auditHref ? (
+            <a href={auditHref} class={primary} data-event="audit_click">
+              {auditLabel}
+            </a>
+          ) : (
+            <Todo need="audit booking link (site settings)" />
+          )
+        }
+      </p>
+    </section>
+
+    <section aria-labelledby="pricing-heading" class="mt-12">
+      <h2 id="pricing-heading" class="sr-only">Pricing</h2>
+      <p class="text-lg text-ink">Builds typically start from {price(site.buildFrom)}.</p>
+      <p class="mt-1 text-muted">{site.deposit}% deposit before work starts.</p>
+    </section>
+
+    <section aria-labelledby="products-heading" class="mt-16">
+      <h2 id="products-heading" class="text-2xl">Products</h2>
+      <div class="service-card mt-6 rounded-xl border border-line bg-bg p-6 md:max-w-2xl">
+        <h3 class="text-xl">Kadi</h3>
+        <p class="mt-2 text-muted">
+          Private invitations, QR gate passes and an offline usher scanner for weddings and events. 500 guests, 500
+          scans, a seamless entry on the day.
+        </p>
+        <p class="mt-4 italic">
+          Hosting an event?
+          <a href={contactPath('kadi')} class="not-italic" data-event="kadi_click">Rent Kadi →</a>
+        </p>
+      </div>
+    </section>
+
+    <section aria-labelledby="contact-heading" class="mt-16 border-t border-line pt-10">
+      <h2 id="contact-heading" class="text-2xl">Two ways to get in touch</h2>
+      <div class="mt-6 flex flex-wrap gap-3">
+        <a href={contactPath()} class={secondary} data-event="free_call_click">Book a free 20-minute call</a>
+        {
+          auditHrefContact ? (
+            <a href={auditHrefContact} class={primary} data-event="audit_click">
+              Book an audit
+            </a>
+          ) : (
+            <Todo need="audit booking link (site settings)" />
+          )
+        }
+      </div>
+      <p class="mt-4 text-sm italic text-muted">{FREE_CALL_FILTER}</p>
+    </section>
+
+    {
+      testimonials.length > 0 && (
+        <section aria-labelledby="testimonials-heading" class="mt-16">
+          <h2 id="testimonials-heading" class="text-2xl">What clients say</h2>
+          <div class="mt-6 grid gap-6 md:grid-cols-2">
+            {testimonials.map((testimonial) => (
+              <Testimonial testimonial={testimonial} />
+            ))}
+          </div>
+        </section>
+      )
+    }
+
+    <Faq faq={faq} />
+    {faq.length === 0 && <p class="mt-16"><Todo need="short FAQ for Work with me" /></p>}
+  </div>
+</BaseLayout>
+
+<style>
+  .wash-band { background: var(--glow), var(--wash); }
+  .service-card:hover { border-color: var(--tint-line); }
+</style>

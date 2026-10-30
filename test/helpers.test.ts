@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { formatDate, isoDate } from '../src/lib/dates';
 import { countWords, readingTime } from '../src/lib/reading-time';
 import { slugify } from '../src/lib/slug';
+import { bookingUrl, contactPath, formatPrice } from '../src/lib/offer';
 import { TAG_VALUES } from '../src/content/tags';
 
 describe('slugify', () => {
@@ -49,5 +50,26 @@ describe('dates', () => {
     const date = new Date('2026-10-26');
     expect(formatDate(date)).toBe('26 Oct 2026');
     expect(isoDate(date)).toBe('2026-10-26');
+  });
+});
+
+describe('offer helpers', () => {
+  it('formats prices from settings with the currency code (brief 12.7)', () => {
+    expect(formatPrice(77, 'USD')).toBe('$77 USD');
+    expect(formatPrice(1500, 'USD')).toBe('$1,500 USD');
+  });
+
+  it('adds the booking tracking parameters (brief section 8)', () => {
+    expect(bookingUrl('https://cal.com/joylynn/audit', 'audit-card')).toBe(
+      'https://cal.com/joylynn/audit?utm_source=site&utm_content=audit-card',
+    );
+    expect(bookingUrl('https://cal.com/joylynn/audit?month=11', 'x')).toBe(
+      'https://cal.com/joylynn/audit?month=11&utm_source=site&utm_content=x',
+    );
+  });
+
+  it('preselects a contact topic', () => {
+    expect(contactPath()).toBe('/contact/');
+    expect(contactPath('kadi')).toBe('/contact/?topic=kadi');
   });
 });

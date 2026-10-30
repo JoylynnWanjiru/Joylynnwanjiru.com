@@ -1,0 +1,132 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Faq from '../../components/Faq.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import Todo from '../../components/Todo.astro';
+import { getProjects, getServices } from '../../lib/entries';
+import { FREE_CALL_FILTER, PROCESS_STEPS, bookingUrl, contactPath } from '../../lib/offer';
+import { faqPageNode, serviceNode } from '../../lib/seo';
+import { getSite } from '../../lib/site';
+
+export async function getStaticPaths() {
+  const services = await getServices();
+  return services.map((service) => ({ params: { service: service.id }, props: { service, services } }));
+}
+
+const { service, services } = Astro.props;
+const { data } = service;
+const { Content } = await render(service);
+const site = await getSite();
+const path = `/work-with-me/${service.id}/`;
+
+// Projects tagged with this service, shown automatically (brief section 5).
+const projects = (await getProjects()).filter((project) => project.data.services.some((ref) => ref.id === service.id));
+const auditHref = site.bookingLinks.audit ? bookingUrl(site.bookingLinks.audit, `service-${service.id}`) : null;
+
+const primary = 'inline-block rounded-full bg-blue px-5 py-2.5 font-medium text-on-blue no-underline';
+const secondary = 'inline-block rounded-full border border-line px-5 py-2.5 font-medium text-ink no-underline hover:border-blue';
+---
+
+<BaseLayout
+  title={data.name}
+  description={data.oneLiner}
+  breadcrumbs={[
+    { name: 'Work with me', path: '/work-with-me/' },
+    { name: data.name, path },
+  ]}
+  schema={[serviceNode(data.name, data.oneLiner, path), ...faqPageNode(data.faq)]}
+>
+  <header class="wash-band">
+    <div class="container-site py-16">
+      <h1 class="text-4xl">{data.name}</h1>
+      <p class="mt-4 max-w-article text-lg text-muted">{data.oneLiner}</p>
+    </div>
+  </header>
+
+  <div class="container-site py-12">
+    <div class="mx-auto max-w-article">
+      <section aria-labelledby="for-heading">
+        <h2 id="for-heading" class="text-2xl">Who it's for</h2>
+        <div class="service-body mt-4"><Content /></div>
+      </section>
+
+      {
+        data.includes.length > 0 && (
+          <section aria-labelledby="includes-heading" class="mt-12">
+            <h2 id="includes-heading" class="text-2xl">What's included</h2>
+            <ul class="mt-4 flex flex-wrap gap-2" role="list">
+              {data.includes.map((item) => (
+                <li class="pill">{item}</li>
+              ))}
+            </ul>
+          </section>
+        )
+      }
+
+      <section aria-labelledby="how-heading" class="mt-12">
+        <h2 id="how-heading" class="text-2xl">How it works</h2>
+        <ol class="mt-4 grid gap-3 sm:grid-cols-2" role="list">
+          {
+            PROCESS_STEPS.map((step, index) => (
+              <li class="rounded-xl border border-line p-4">
+                <span class="text-sm text-muted">Step {index + 1}</span>
+                <p class="font-heading font-semibold text-ink">{step}</p>
+              </li>
+            ))
+          }
+        </ol>
+      </section>
+    </div>
+
+    <section aria-labelledby="projects-heading" class="mt-16">
+      <h2 id="projects-heading" class="text-2xl">Related work</h2>
+      {
+        projects.length > 0 ? (
+          <ul class="mt-6 grid gap-6 md:grid-cols-2 lg:grid-cols-3" role="list">
+            {projects.map((project) => (
+              <li>
+                <ProjectCard project={project} services={services} />
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p class="mt-4 text-muted">
+            Case studies for this service are on their way. In the meantime,
+            <a href={contactPath()} data-event="free_call_click"> book a free 20-minute call</a>.
+          </p>
+        )
+      }
+    </section>
+
+    <div class="mx-auto max-w-article">
+      <Faq faq={data.faq} />
+
+      <section aria-labelledby="next-heading" class="mt-16 border-t border-line pt-10">
+        <h2 id="next-heading" class="text-2xl">Next step</h2>
+        <div class="mt-6 flex flex-wrap gap-3">
+          <a href={contactPath(service.id)} class={primary} data-event={`service_click_${service.id}`}>
+            {data.buttonLabel}
+          </a>
+          <a href={contactPath()} class={secondary} data-event="free_call_click">Book a free 20-minute call</a>
+          {
+            auditHref ? (
+              <a href={auditHref} class={secondary} data-event="audit_click">
+                Book an audit
+              </a>
+            ) : (
+              <Todo need="audit booking link (site settings)" />
+            )
+          }
+        </div>
+        <p class="mt-4 text-sm italic text-muted">{FREE_CALL_FILTER}</p>
+      </section>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .wash-band { background: var(--glow), var(--wash); }
+  .service-body :global(p) { margin-top: 1rem; }
+  .service-body :global(p:first-child) { margin-top: 0; }
+</style>

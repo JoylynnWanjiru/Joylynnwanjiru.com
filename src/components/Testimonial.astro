@@ -1,0 +1,19 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+// Callers pass only testimonials with permission: true (BR-3, getTestimonials).
+interface Props {
+  testimonial: CollectionEntry<'testimonials'>;
+  class?: string;
+}
+const { testimonial, class: className } = Astro.props;
+const { data } = testimonial;
+---
+
+<figure class:list={['rounded-xl border border-tint-line bg-wash p-6', className]}>
+  <blockquote class="text-lg text-ink">“{data.quote}”</blockquote>
+  <figcaption class="mt-4 text-sm text-muted">
+    {data.link ? <a href={data.link}>{data.name}</a> : data.name}
+    {[data.role, data.organisation].filter(Boolean).map((part) => `, ${part}`)}
+  </figcaption>
+</figure>

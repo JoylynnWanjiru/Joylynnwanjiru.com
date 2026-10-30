@@ -6,6 +6,9 @@ export const MARKER = 'TODO(joylynn)';
 // The component that renders the marker on pages; its own source is not content.
 const IGNORED = ['src/components/Todo.astro'];
 
+/** A usage of that component; `blocker` marks a launch blocker. */
+const TODO_COMPONENT = /<Todo\b([^>]*?)\/?>/g;
+
 /**
  * Files whose placeholders block launch (brief section 10). Posts are handled
  * separately: only published ones block.
@@ -34,9 +37,14 @@ export function launchReport(files) {
     if (IGNORED.includes(path)) continue;
     const blocking = path in BLOCKER_FILES || isPublishedPost(path, text);
     text.split(/\r?\n/).forEach((line, index) => {
-      if (!line.includes(MARKER)) return;
-      const entry = `${path}:${index + 1}  ${line.trim()}`;
-      (blocking ? blockers : others).push(entry);
+      const where = `${path}:${index + 1}`;
+      if (line.includes(MARKER)) (blocking ? blockers : others).push(`${where}  ${line.trim()}`);
+      // The <Todo need="…" /> component renders the marker, so its source does not contain it.
+      for (const [, attributes] of line.matchAll(TODO_COMPONENT)) {
+        const need = attributes.match(/\bneed="([^"]*)"/)?.[1] ?? '';
+        const entry = `${where}  ${MARKER}: ${need}`;
+        (blocking || /\sblocker\b/.test(attributes) ? blockers : others).push(entry);
+      }
     });
   }
 

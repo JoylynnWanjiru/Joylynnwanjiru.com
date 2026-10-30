@@ -52,6 +52,13 @@ describe('check:launch', () => {
     ]);
   });
 
+  it('lists <Todo> component usages, blocking only when marked', () => {
+    const page = '<p><Todo need="portrait photo" blocker /></p>\n<Todo need="screenshot" />';
+    const report = launchReport([...readyFiles, { path: 'src/pages/index.astro', text: page }]);
+    expect(report.blockers).toEqual(['src/pages/index.astro:1  TODO(joylynn): portrait photo']);
+    expect(report.others).toEqual(['src/pages/index.astro:2  TODO(joylynn): screenshot']);
+  });
+
   it('ignores the Todo component source', () => {
     expect(launchReport([...readyFiles, { path: 'src/components/Todo.astro', text: 'TODO(joylynn): {need}' }]).others).toEqual([]);
   });

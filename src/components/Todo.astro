@@ -1,8 +1,9 @@
 ---
 // Visible placeholder for content Joylynn has not provided yet (brief section 0, rule 1).
-// `pnpm check:launch` finds these by the TODO(joylynn) text in source.
+// `pnpm check:launch` lists every usage; add `blocker` when it blocks launch (section 10).
 interface Props {
   need: string;
+  blocker?: boolean;
 }
 const { need } = Astro.props;
 ---

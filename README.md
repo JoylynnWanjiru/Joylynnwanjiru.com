@@ -2,7 +2,23 @@
 
 Source for Joylynn Wanjiru's personal site: writing, a weekly Steps log, case studies and a way to work with her. `BUILD_BRIEF.md` is the full specification; this file describes only what is in the repo today.
 
-**Status:** Phase 1 (foundation) of the build plan in brief section 9. Content pages arrive in Phase 2, so most links in the header lead nowhere yet.
+**Status:** Phase 2 (pages) of the build plan in brief section 9. Every page route exists with plain markup and visible placeholders; the visual pass against the design mockups is still to come. Forms render but do not send yet (Phase 3).
+
+## Pages
+
+| URL | Page |
+| --- | --- |
+| `/` | Home |
+| `/start/` | Start here (editor-picked posts and case study) |
+| `/writing/`, `/writing/page/[n]/`, `/writing/tags/[tag]/`, `/writing/series/[series]/`, `/writing/[slug]/` | Writing index (9 per page), tag and series pages, posts |
+| `/steps/`, `/steps/[slug]/` | Steps log |
+| `/work/`, `/work/[slug]/` | Work index (service filter without JavaScript, experience timeline) and case studies |
+| `/about/` | About + Now (`#now`); `/now` redirects there |
+| `/work-with-me/`, `/work-with-me/[service]/` | Services, One Step Audit, Kadi, service pages |
+| `/contact/` | Contact form (posts to `/api/contact`, which arrives in Phase 3) |
+| `/404` | Not found |
+
+Drafts (`draft: true`) render only in `pnpm dev`, never in a build (BR-5).
 
 ## Stack
 
@@ -52,10 +68,11 @@ Copy `.env.example` to `.env` only if you need Keystatic's GitHub mode locally.
 build/            Build rules (Astro integration) and the pure checks it and the scripts share
 scripts/          check:launch, check:images, published-URL check
 src/assets/       Images (all images go through astro:assets)
-src/components/   Header, Footer, SEOHead, ThemeToggle, Todo placeholder
+src/components/   Header, Footer, SEOHead, ThemeToggle, Todo placeholder, cards, lists, FAQ, pagination
 src/content/      Posts, steps, projects, experience, services, testimonials, page singletons, settings
 src/layouts/      BaseLayout
-src/lib/          Shared helpers: slugs, dates, reading time, SEO, site settings, social images
+src/lib/          Shared helpers: slugs, dates, reading time, SEO, site settings, social images,
+                  collection queries, prices and booking links, contact form options
 src/pages/        Routes, including og/ (social images), rss.xml, robots.txt, llms.txt
 test/             Vitest tests, including the Keystatic/Astro schema drift test
 keystatic.config.ts   Editor collections (kept in step with src/content.config.ts)
@@ -75,7 +92,7 @@ The build fails if a published post, step or project has no description, an imag
 ## CI and deploys
 
 - **Cloudflare Workers Builds** deploys `main` to production and every other branch to a preview at `https://<branch>-joylynnwanjiru.joylynnwanjiru-com.workers.dev`.
-- **GitHub Actions** (`.github/workflows/ci.yml`) on pull requests and `main`: type check, lint, tests, large-image warning, build, published-URL check, internal link check and the launch check (report only until Phase 4). On pull requests it also runs Lighthouse (mobile) against the preview and fails below the budget in brief section 7 (`lighthouserc.json`).
+- **GitHub Actions** (`.github/workflows/ci.yml`) on pull requests and `main`: type check, lint, tests, large-image warning, build, published-URL check, internal link check (offline; `/api/` routes skipped) and the launch check (report only until Phase 4). On pull requests it also runs Lighthouse (mobile) against the preview and fails below the budget in brief section 7 (`lighthouserc.json`).
 - **Monthly link check** (`.github/workflows/link-check.yml`) opens an issue for broken links.
 - **Dependabot** opens weekly update pull requests.
 

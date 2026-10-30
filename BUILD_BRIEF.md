@@ -123,7 +123,7 @@ flowchart LR
 Minimal, calm, generous white space, one accent per screen. Blue is for action. Pink is the warm spark. No heavy shadows, no gradients except the soft hero glow. It must feel premium to an international client and readable for long posts.
 
 ### Colour tokens
-Use exactly these. Contrast was checked: all text pairings pass WCAG AA except pink text on white, which is why `--pink-text` exists.
+Use exactly these. Contrast was checked: all text pairings pass WCAG AA except pink text on white, which is why `--pink-text` exists. Updated 30 October 2026 (Joylynn approved): the light `--pink-text` was darkened from `#C92F72` to `#C42D6F`, because the old value measured 4.37:1 on `--tint`, so pills failed AA.
 
 ```css
 :root{

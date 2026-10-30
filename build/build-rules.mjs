@@ -3,11 +3,13 @@
 //   prepare: reads the build-only published.json, writes _redirects and the
 //            security headers, and records noindex/draft paths for the sitemap filter.
 //   verify:  after the sitemap exists, fails the build if a draft or noindex page
-//            leaked into the sitemap, RSS, llms.txt or the built pages (BR-5, BR-6).
+//            leaked into the sitemap, RSS, llms.txt, the search index or the built
+//            pages (BR-5, BR-6), then builds the Pagefind search index.
 import { existsSync } from 'node:fs';
 import { readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import * as pagefind from 'pagefind';
 import { contentSecurityPolicy, hiddenPageLeaks, inlineScriptHashes, pagePath } from './checks.mjs';
 
 const MAX_HEADER_LINE = 2000; // Cloudflare _headers limit per line
@@ -91,16 +93,30 @@ export function buildRules(siteUrl) {
         }
         const problems = hiddenPageLeaks(hidden, outputs, built, siteUrl);
 
-        // noindex pages must carry the robots tag (BR-6).
+        // noindex pages must carry the robots tag and stay out of search (BR-6).
+        // Pagefind indexes only pages marked data-pagefind-body (BaseLayout skips noindex ones).
         for (const { path } of hidden.filter((page) => page.reason === 'noindex')) {
           const file = files.find((f) => pagePath(relative(out, f)) === path);
-          if (file && !/<meta name="robots" content="noindex/.test(await readFile(file, 'utf8'))) {
+          if (!file) continue;
+          const html = await readFile(file, 'utf8');
+          if (!/<meta name="robots" content="noindex/.test(html)) {
             problems.push(`Noindex page ${path} is missing its robots noindex tag.`);
           }
+          if (/\bdata-pagefind-body\b/.test(html)) problems.push(`Noindex page ${path} would be in the search index.`);
         }
 
         if (problems.length > 0) throw new Error(`Build rules failed:\n- ${problems.join('\n- ')}`);
         logger.info(`Checked ${hidden.length} hidden page(s): none leaked.`);
+
+        // Search index (Pagefind), loaded in the browser only when search opens.
+        const { index, errors: createErrors } = await pagefind.createIndex();
+        if (!index) throw new Error(`Pagefind failed: ${createErrors.join('; ')}`);
+        const added = await index.addDirectory({ path: out });
+        const written = await index.writeFiles({ outputPath: join(out, 'pagefind') });
+        await pagefind.close();
+        const errors = [...added.errors, ...written.errors];
+        if (errors.length > 0) throw new Error(`Pagefind failed: ${errors.join('; ')}`);
+        logger.info(`Search index: ${added.page_count} page(s).`);
       },
     },
   };

@@ -185,8 +185,8 @@ describe('Security headers (brief 12.5)', () => {
   it('allows only this site, Turnstile and Cloudflare analytics', () => {
     const csp = contentSecurityPolicy(["'sha256-abc'"]);
     expect(csp).toContain("default-src 'self'");
-    expect(csp).toContain("script-src 'self' 'sha256-abc' https://challenges.cloudflare.com https://static.cloudflareinsights.com");
+    expect(csp).toContain("script-src 'self' 'wasm-unsafe-eval' 'sha256-abc' https://challenges.cloudflare.com https://static.cloudflareinsights.com");
     expect(csp).toContain("frame-ancestors 'none'");
-    expect(csp).not.toContain('unsafe-eval');
+    expect(csp).not.toContain("'unsafe-eval'"); // 'wasm-unsafe-eval' (Pagefind) allows WebAssembly only
   });
 });

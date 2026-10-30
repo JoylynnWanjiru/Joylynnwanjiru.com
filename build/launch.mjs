@@ -63,6 +63,9 @@ export function launchReport(files) {
   const home = file('src/content/pages/home.yaml');
   if (home && /^portrait:\s*(null|~)?\s*$/m.test(home)) blockers.push('Home: portrait photo is not set');
 
+  const about = file('src/content/pages/about.mdx');
+  if (about && /^photo:\s*(null|~)?\s*$/m.test(frontmatter(about))) blockers.push('About: photo is not set');
+
   const published = files.filter(({ path, text }) => isPublishedPost(path, text));
   if (published.length === 0) blockers.push('Writing: no published post yet (at least one is needed)');
 

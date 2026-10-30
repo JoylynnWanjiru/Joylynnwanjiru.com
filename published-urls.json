@@ -1,4 +1,7 @@
 {
   "urls": ["/"],
-  "redirects": {}
+  "redirects": {
+    "/now": "/about/#now",
+    "/now/": "/about/#now"
+  }
 }

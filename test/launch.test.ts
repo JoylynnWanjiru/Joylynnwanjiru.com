@@ -11,7 +11,7 @@ const readySite = JSON.stringify({
 const readyFiles = [
   { path: 'src/content/settings/site.json', text: readySite },
   { path: 'src/content/pages/home.yaml', text: 'portrait: ../../assets/portrait.jpg\nportraitAlt: Joylynn\n' },
-  { path: 'src/content/pages/about.mdx', text: '---\nshortBio: Hello\n---\nLong bio.\n' },
+  { path: 'src/content/pages/about.mdx', text: '---\nshortBio: Hello\nphoto: ../../assets/about.jpg\nphotoAlt: Joylynn\n---\nLong bio.\n' },
   { path: 'src/content/posts/live.mdx', text: '---\ntitle: Live\ndraft: false\n---\nBody.\n' },
 ];
 const withFile = (path: string, text: string) => [...readyFiles.filter((file) => file.path !== path), { path, text }];
@@ -49,6 +49,9 @@ describe('check:launch', () => {
     expect(launchReport(withFile('src/content/settings/site.json', site)).blockers).toHaveLength(4);
     expect(launchReport(withFile('src/content/pages/home.yaml', 'portrait: null\n')).blockers).toEqual([
       'Home: portrait photo is not set',
+    ]);
+    expect(launchReport(withFile('src/content/pages/about.mdx', '---\nshortBio: Hello\nphoto: null\n---\n')).blockers).toEqual([
+      'About: photo is not set',
     ]);
   });
 

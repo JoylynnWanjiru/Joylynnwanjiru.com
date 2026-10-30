@@ -1,0 +1,137 @@
+---
+import { Image } from 'astro:assets';
+import { getEntry, render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Todo from '../components/Todo.astro';
+import { formatDate, isoDate } from '../lib/dates';
+
+const about = await getEntry('about', 'about');
+const now = await getEntry('now', 'now');
+if (!about || !now) throw new Error('Missing About or Now page content in src/content/pages');
+const { Content } = await render(about);
+const { data } = about;
+const path = '/about/';
+
+// Fixed copy from brief section 5.
+const sayNo = [
+  'Free strategy work before an engagement',
+  'Projects without a clear decision-maker',
+  'AI where simple automation would do the job better',
+];
+---
+
+<BaseLayout
+  title={data.seo?.title || 'About'}
+  description={data.seo?.description || data.shortBio}
+  canonical={data.seo?.canonical}
+  noindex={data.seo?.noindex}
+  breadcrumbs={[{ name: 'About', path }]}
+>
+  <div class="container-site py-12">
+    <div class="mx-auto max-w-article">
+      <h1 class="text-4xl">About</h1>
+      <p class="mt-4 text-lg text-muted">{data.shortBio}</p>
+
+      <div class="mt-8">
+        {
+          data.photo ? (
+            <Image
+              src={data.photo}
+              alt={data.photoAlt ?? ''}
+              width={672}
+              class="h-auto w-full rounded-xl"
+              loading="eager"
+            />
+          ) : (
+            <Todo need="About photo" />
+          )
+        }
+      </div>
+
+      <div class="about-body mt-8">
+        <Content />
+      </div>
+
+      {
+        data.education.length > 0 && (
+          <section aria-labelledby="education-heading" class="mt-12">
+            <h2 id="education-heading" class="text-2xl">Education</h2>
+            <ul class="mt-4 space-y-3" role="list">
+              {data.education.map((item) => (
+                <li>
+                  <p class="font-medium text-ink">{item.institution}</p>
+                  {(item.qualification || item.years) && (
+                    <p class="text-sm text-muted">{[item.qualification, item.years].filter(Boolean).join(' · ')}</p>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )
+      }
+
+      {
+        data.timeline.length > 0 && (
+          <section aria-labelledby="timeline-heading" class="mt-12">
+            <h2 id="timeline-heading" class="text-2xl">Timeline</h2>
+            <ol class="mt-4 border-l border-line" role="list">
+              {data.timeline.map((item) => (
+                <li class="relative py-3 pl-6">
+                  <p class="text-sm text-muted">{item.when}</p>
+                  <p class="mt-1 text-ink">{item.what}</p>
+                </li>
+              ))}
+            </ol>
+          </section>
+        )
+      }
+
+      {
+        data.photographyNote && (
+          <section aria-labelledby="photography-heading" class="mt-12">
+            <h2 id="photography-heading" class="text-2xl">Photography</h2>
+            <p class="mt-4">{data.photographyNote}</p>
+          </section>
+        )
+      }
+
+      <section id="now" aria-labelledby="now-heading" class="mt-16 scroll-mt-24 border-t border-line pt-10">
+        <h2 id="now-heading" class="text-2xl">Now</h2>
+        <p class="mt-2 text-sm text-muted">
+          Last updated <time datetime={isoDate(now.data.updated)}>{formatDate(now.data.updated)}</time>
+        </p>
+        <dl class="mt-6 space-y-5">
+          <div>
+            <dt class="font-heading font-semibold text-ink">Current focus</dt>
+            <dd class="mt-1">{now.data.focus}</dd>
+          </div>
+          <div>
+            <dt class="font-heading font-semibold text-ink">What I'm building</dt>
+            <dd class="mt-1">{now.data.building}</dd>
+          </div>
+          <div>
+            <dt class="font-heading font-semibold text-ink">What I'm learning</dt>
+            <dd class="mt-1">{now.data.learning}</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section aria-labelledby="say-no-heading" class="mt-16">
+        <h2 id="say-no-heading" class="text-2xl">What I say no to</h2>
+        <ul class="mt-4 list-disc space-y-2 pl-5">
+          {sayNo.map((item) => <li>{item}</li>)}
+        </ul>
+      </section>
+
+      <section aria-labelledby="cv-heading" class="mt-16">
+        <h2 id="cv-heading" class="text-2xl">CV</h2>
+        <p class="mt-4"><Todo need="cv.pdf (one-page CV)" /></p>
+      </section>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .about-body :global(p) { margin-top: 1rem; }
+  .about-body :global(h2) { margin-top: 2.5rem; font-size: var(--text-2xl); }
+</style>

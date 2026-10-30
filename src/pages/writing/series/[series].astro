@@ -1,0 +1,45 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import PostList from '../../../components/PostList.astro';
+import WritingFilters from '../../../components/WritingFilters.astro';
+import { getPosts } from '../../../lib/entries';
+import { seriesInUse } from '../../../lib/collections';
+import { collectionPageNode } from '../../../lib/seo';
+
+// One static page per series; posts in reading order (oldest first).
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  return seriesInUse(posts).map((series) => ({
+    params: { series: series.slug },
+    props: {
+      name: series.name,
+      posts,
+      inSeries: posts.filter((post) => post.data.series?.trim() === series.name).reverse(),
+    },
+  }));
+}
+
+const { name, posts, inSeries } = Astro.props;
+const path = `/writing/series/${Astro.params.series}/`;
+const title = `Series: ${name}`;
+---
+
+<BaseLayout
+  title={title}
+  breadcrumbs={[
+    { name: 'Writing', path: '/writing/' },
+    { name, path },
+  ]}
+  schema={[collectionPageNode(title, path, inSeries.map((post) => ({ name: post.data.title, path: `/writing/${post.id}/` })))]}
+>
+  <div class="container-site py-12">
+    <div class="mx-auto max-w-article">
+      <h1 class="text-4xl">{title}</h1>
+      <p class="mt-4 text-lg text-muted">{inSeries.length} {inSeries.length === 1 ? 'part' : 'parts'}, in reading order.</p>
+      <WritingFilters posts={posts} current={path} />
+      <div class="mt-6">
+        <PostList posts={inSeries} />
+      </div>
+    </div>
+  </div>
+</BaseLayout>

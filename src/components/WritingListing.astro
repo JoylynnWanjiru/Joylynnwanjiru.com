@@ -1,0 +1,38 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PostList from './PostList.astro';
+import Pagination from './Pagination.astro';
+import WritingFilters from './WritingFilters.astro';
+import Todo from './Todo.astro';
+import { getPosts } from '../lib/entries';
+import { paginate, writingPagePath } from '../lib/collections';
+import { collectionPageNode } from '../lib/seo';
+
+// One writing index page; /writing/ is page 1 and /writing/page/n/ the rest.
+interface Props {
+  page: number;
+}
+const posts = await getPosts();
+const { items, page, totalPages } = paginate(posts, Astro.props.page);
+const path = writingPagePath(page);
+const title = page === 1 ? 'Writing' : `Writing, page ${page}`;
+---
+
+<BaseLayout
+  title={title}
+  breadcrumbs={page === 1 ? [{ name: 'Writing', path }] : [{ name: 'Writing', path: '/writing/' }, { name: `Page ${page}`, path }]}
+  schema={[collectionPageNode(title, path, items.map((post) => ({ name: post.data.title, path: `/writing/${post.id}/` })))]}
+>
+  <div class="container-site py-12">
+    <div class="mx-auto max-w-article">
+      <h1 class="text-4xl">Writing</h1>
+      <p class="mt-4 text-lg text-muted"><Todo need="one line on what you write about" /></p>
+      <!-- The One Step subscribe form arrives with the Beehiiv integration (phase 3). -->
+      <WritingFilters posts={posts} />
+      <div class="mt-6">
+        <PostList posts={items} />
+      </div>
+      <Pagination page={page} totalPages={totalPages} />
+    </div>
+  </div>
+</BaseLayout>

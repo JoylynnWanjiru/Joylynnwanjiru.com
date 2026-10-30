@@ -129,6 +129,19 @@
     text-decoration: none;
   }
   .skip-link:focus { top: 1rem; }
+  /* Pills and tags (brief section 3, usage rules). */
+  .pill {
+    display: inline-block;
+    padding: 0.125rem 0.625rem;
+    border: 1px solid var(--tint-line);
+    border-radius: 9999px;
+    background: var(--tint);
+    color: var(--pink-text);
+    font-size: var(--text-sm);
+    text-decoration: none;
+  }
+  a.pill:hover { border-color: var(--pink-text); }
+  a.pill[aria-current='page'] { border-color: var(--pink-text); font-weight: 600; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -1,0 +1,43 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getSteps } from '../../lib/entries';
+import { formatDate, isoDate } from '../../lib/dates';
+import { collectionPageNode } from '../../lib/seo';
+
+const steps = await getSteps();
+const path = '/steps/';
+---
+
+<BaseLayout
+  title="Steps"
+  breadcrumbs={[{ name: 'Steps', path }]}
+  schema={[collectionPageNode('Steps', path, steps.map((step) => ({ name: step.data.title, path: `/steps/${step.id}/` })))]}
+>
+  <div class="container-site py-12">
+    <div class="mx-auto max-w-article">
+      <h1 class="text-4xl">Steps</h1>
+      <p class="mt-4 text-lg text-muted">A short weekly log of what I'm learning, one step at a time.</p>
+      {
+        steps.length === 0 ? (
+          <p class="mt-8 text-muted">The first step is on its way.</p>
+        ) : (
+          <ol class="mt-8 divide-y divide-line" role="list">
+            {steps.map((step) => (
+              <li class="py-5">
+                <p class="text-sm text-muted">
+                  Step {step.data.number} · <time datetime={isoDate(step.data.date)}>{formatDate(step.data.date)}</time>
+                </p>
+                <h2 class="mt-1 text-xl">
+                  <a href={`/steps/${step.id}/`} class="text-ink no-underline hover:text-blue">
+                    {step.data.title}
+                  </a>
+                </h2>
+                <p class="mt-1 text-muted">{step.data.summary}</p>
+              </li>
+            ))}
+          </ol>
+        )
+      }
+    </div>
+  </div>
+</BaseLayout>

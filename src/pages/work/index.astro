@@ -1,0 +1,118 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import Todo from '../../components/Todo.astro';
+import { getExperience, getProjects, getServices } from '../../lib/entries';
+import { formatDate, isoDate } from '../../lib/dates';
+import { collectionPageNode } from '../../lib/seo';
+
+const [projects, services, experience] = await Promise.all([getProjects(), getServices(), getExperience()]);
+const featured = projects.filter((project) => project.data.featured);
+const usedServices = services.filter((service) =>
+  projects.some((project) => project.data.services.some((ref) => ref.id === service.id)),
+);
+const path = '/work/';
+// One rule per service: hide grid items not tagged with the checked service.
+const filterRules = usedServices
+  .map(
+    ({ id }) =>
+      `#all-projects:has(input[value="${id}"]:checked) .project-grid > li:not([data-services~="${id}"]){display:none}`,
+  )
+  .join('');
+---
+
+<BaseLayout
+  title="Work"
+  breadcrumbs={[{ name: 'Work', path }]}
+  schema={[collectionPageNode('Work', path, projects.map((p) => ({ name: p.data.title, path: `/work/${p.id}/` })))]}
+>
+  <div class="container-site py-12">
+    <h1 class="text-4xl">Work</h1>
+
+    {
+      projects.length === 0 ? (
+        <p class="mt-8 text-muted">Case studies are on their way.</p>
+      ) : (
+        <>
+          {featured.length > 0 && (
+            <section aria-labelledby="featured-heading" class="mt-10">
+              <h2 id="featured-heading" class="text-2xl">Featured case studies</h2>
+              <ul class="mt-6 grid gap-6 md:grid-cols-2 lg:grid-cols-3" role="list">
+                {featured.map((project) => (
+                  <li>
+                    <ProjectCard project={project} services={services} />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          <section id="all-projects" aria-labelledby="all-heading" class="mt-14">
+            <h2 id="all-heading" class="text-2xl">All projects</h2>
+            {/* Filter by service without JavaScript: radio buttons plus :has() in CSS.
+                Browsers without :has() simply show every project. */}
+            {usedServices.length > 0 && (
+              <fieldset class="work-filter mt-4 flex flex-wrap gap-2">
+                <legend class="sr-only">Filter by service</legend>
+                <label class="pill cursor-pointer">
+                  <input type="radio" name="service" value="" class="sr-only" checked />
+                  All
+                </label>
+                {usedServices.map((service) => (
+                  <label class="pill cursor-pointer">
+                    <input type="radio" name="service" value={service.id} class="sr-only" />
+                    {service.data.name}
+                  </label>
+                ))}
+              </fieldset>
+            )}
+            {filterRules && <style set:html={filterRules} />}
+            <ul class="project-grid mt-6 grid gap-6 md:grid-cols-2 lg:grid-cols-3" role="list">
+              {projects.map((project) => (
+                <li data-services={project.data.services.map((ref) => ref.id).join(' ')}>
+                  <ProjectCard project={project} services={services} />
+                </li>
+              ))}
+            </ul>
+          </section>
+        </>
+      )
+    }
+    <p class="mt-8 text-muted">More projects coming.</p>
+
+    <section aria-labelledby="experience-heading" class="mt-16 max-w-article">
+      <h2 id="experience-heading" class="text-2xl">Experience</h2>
+      {
+        experience.length === 0 ? (
+          <p class="mt-4 text-muted"><Todo need="experience timeline entries" /></p>
+        ) : (
+          <ol class="mt-6 space-y-8 border-l border-line pl-6" role="list">
+            {experience.map(({ data }) => (
+              <li>
+                <h3 class="text-lg">
+                  {data.role},{' '}
+                  {data.url ? <a href={data.url}>{data.organisation}</a> : data.organisation}
+                </h3>
+                <p class="mt-1 text-sm text-muted">
+                  <time datetime={isoDate(data.start)}>{formatDate(data.start)}</time> to{' '}
+                  {data.end ? <time datetime={isoDate(data.end)}>{formatDate(data.end)}</time> : 'present'}
+                  {data.location && <> · {data.location}</>}
+                </p>
+                {data.highlights.length > 0 && (
+                  <ul class="mt-2 list-disc space-y-1 pl-5">
+                    {data.highlights.map((item) => <li>{item}</li>)}
+                  </ul>
+                )}
+              </li>
+            ))}
+          </ol>
+        )
+      }
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .work-filter label:has(input:checked) { border-color: var(--pink-text); font-weight: 600; }
+  .work-filter label:has(input:focus-visible) { outline: 2px solid var(--blue); outline-offset: 3px; }
+</style>

@@ -101,3 +101,29 @@ export function collectionPageNode(name: string, path: string, items: { name: st
     },
   };
 }
+
+/** FAQPage node, only when there are questions (brief section 7). */
+export function faqPageNode(faq: { question: string; answer: string }[]) {
+  if (faq.length === 0) return [];
+  return [
+    {
+      '@type': 'FAQPage',
+      mainEntity: faq.map((item) => ({
+        '@type': 'Question',
+        name: item.question,
+        acceptedAnswer: { '@type': 'Answer', text: item.answer },
+      })),
+    },
+  ];
+}
+
+/** Service node with the Person as provider (brief section 7). */
+export function serviceNode(name: string, description: string, path: string) {
+  return {
+    '@type': 'Service',
+    name,
+    description,
+    url: absoluteUrl(path),
+    provider: { '@id': `${SITE_URL}/#person` },
+  };
+}

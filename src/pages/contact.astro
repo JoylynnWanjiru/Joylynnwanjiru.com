@@ -1,0 +1,26 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Todo from '../components/Todo.astro';
+import { getSite } from '../lib/site';
+import { MARKER } from '../../build/launch.mjs';
+
+const site = await getSite();
+const path = '/contact/';
+const hasEmail = !site.email.includes(MARKER);
+---
+
+<BaseLayout title="Contact" description="Get in touch with Joylynn Wanjiru." breadcrumbs={[{ name: 'Contact', path }]}>
+  <div class="container-site py-12">
+    <div class="mx-auto max-w-article">
+      <h1 class="text-4xl">Contact</h1>
+      <p class="mt-6"><Todo need="contact form (built in the next pull request)" /></p>
+      <p class="mt-8">
+        Email:
+        {hasEmail ? <a href={`mailto:${site.email}`}>{site.email}</a> : <Todo need="contact email" />}
+      </p>
+      <p class="mt-2 text-muted">
+        Based in Nairobi ({site.timeZone}): overlaps the full European workday and US East Coast mornings.
+      </p>
+    </div>
+  </div>
+</BaseLayout>

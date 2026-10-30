@@ -2,6 +2,7 @@
 import { Image } from 'astro:assets';
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import Testimonial from '../../components/Testimonial.astro';
 import { confidentialWithLinks } from '../../lib/collections';
 import { getServices, getTestimonials } from '../../lib/entries';
 import { SITE_URL, absoluteUrl, socialImagePath } from '../../lib/seo';
@@ -145,17 +146,7 @@ const creativeWork = {
         }
       </section>
 
-      {
-        testimonial && (
-          <figure class="mt-12 rounded-xl border border-tint-line bg-wash p-6">
-            <blockquote class="text-lg text-ink">“{testimonial.data.quote}”</blockquote>
-            <figcaption class="mt-4 text-sm text-muted">
-              {testimonial.data.link ? <a href={testimonial.data.link}>{testimonial.data.name}</a> : testimonial.data.name}
-              {[testimonial.data.role, testimonial.data.organisation].filter(Boolean).map((part) => `, ${part}`)}
-            </figcaption>
-          </figure>
-        )
-      }
+      {testimonial && <Testimonial testimonial={testimonial} class="mt-12" />}
 
       {
         services.length > 0 && (

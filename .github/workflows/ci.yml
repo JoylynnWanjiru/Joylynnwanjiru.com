@@ -48,12 +48,14 @@ jobs:
 
       # Internal links only (offline): external sites are checked monthly by
       # link-check.yml, so a flaky third party never blocks a pull request.
+      # /api/* routes run on the server, so they have no file in dist/ to find.
       - name: Internal link check
         uses: lycheeverse/lychee-action@v2
         with:
           args: >-
             --offline --no-progress --include-fragments
             --root-dir "${{ github.workspace }}/dist/client"
+            --exclude '/api/'
             'dist/client/**/*.html'
           fail: true
 

@@ -33,6 +33,7 @@ jobs:
             --no-progress --include-fragments
             --root-dir "${{ github.workspace }}/dist/client"
             --exclude '^https://joylynnwanjiru\.com'
+            --exclude '/api/'
             'dist/client/**/*.html'
           output: ./lychee/out.md
           fail: false

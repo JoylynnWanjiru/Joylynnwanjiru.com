@@ -1,0 +1,49 @@
+---
+// One Step sign-up form (brief sections 6 and 8). A real HTML form posting to
+// /api/subscribe, so it works without the script; `location` is passed for tracking.
+import { TURNSTILE_SITE_KEY } from 'astro:env/client';
+import { NEWSLETTER } from '../lib/newsletter';
+import type { Location } from '../lib/server/subscribe';
+
+interface Props {
+  location: Location;
+}
+const { location } = Astro.props;
+const id = `newsletter-email-${location}`;
+---
+
+<form method="post" action="/api/subscribe" class="newsletter-form space-y-3" data-newsletter-form>
+  <input type="hidden" name="location" value={location} />
+  <input type="hidden" name="path" value={Astro.url.pathname} />
+  <div class="honeypot" aria-hidden="true">
+    <label for={`${id}-nickname`}>Leave this empty</label>
+    <input id={`${id}-nickname`} name="nickname" type="text" tabindex="-1" autocomplete="off" />
+  </div>
+  <label for={id} class="sr-only">Email address</label>
+  <div class="flex flex-wrap gap-2">
+    <input
+      id={id}
+      name="email"
+      type="email"
+      autocomplete="email"
+      required
+      maxlength="254"
+      placeholder="you@example.com"
+      class="min-w-0 flex-1 rounded-full border border-line bg-bg px-4 py-2.5 text-ink"
+    />
+    <button type="submit" class="rounded-full bg-blue px-5 py-2.5 font-medium text-on-blue disabled:opacity-60">
+      {NEWSLETTER.button}
+    </button>
+  </div>
+  {TURNSTILE_SITE_KEY && <div data-turnstile data-sitekey={TURNSTILE_SITE_KEY}></div>}
+  <p class="text-sm text-muted" data-newsletter-status role="status">{NEWSLETTER.note}</p>
+</form>
+
+<script>
+  import { enhanceNewsletterForms } from '../lib/newsletter-form';
+  enhanceNewsletterForms(document.querySelectorAll<HTMLFormElement>('[data-newsletter-form]'));
+</script>
+
+<style>
+  .honeypot { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+</style>

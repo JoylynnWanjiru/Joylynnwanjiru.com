@@ -1,0 +1,38 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Todo from '../../components/Todo.astro';
+import { getSite } from '../../lib/site';
+import { NEWSLETTER, SUBSCRIBE_MESSAGES, type SubscribeResult } from '../../lib/newsletter';
+import { MARKER } from '../../../build/launch.mjs';
+
+// Where /api/subscribe sends a form posted without JavaScript (brief 12.4).
+// Paths match SUBSCRIBE_PATHS in src/lib/newsletter.ts.
+export function getStaticPaths() {
+  return [
+    { params: { result: 'thanks' }, props: { result: 'subscribed' as SubscribeResult } },
+    { params: { result: 'already' }, props: { result: 'already' as SubscribeResult } },
+    { params: { result: 'error' }, props: { result: 'failed' as SubscribeResult } },
+  ];
+}
+
+const { result } = Astro.props;
+const site = await getSite();
+const hasEmail = !site.email.includes(MARKER);
+---
+
+<BaseLayout title={NEWSLETTER.name} description={NEWSLETTER.pitch} noindex>
+  <section class="container-site py-20">
+    <div class="mx-auto max-w-article">
+      <p class="font-code text-sm text-pink-text">{NEWSLETTER.name}</p>
+      <h1 class="mt-2 text-4xl">{SUBSCRIBE_MESSAGES[result]}</h1>
+      {
+        result === 'failed' && (
+          <p class="mt-6">
+            {hasEmail ? <a href={`mailto:${site.email}`}>{site.email}</a> : <Todo need="contact email" />}
+          </p>
+        )
+      }
+      <p class="mt-10"><a href="/writing/">Read the writing</a> · <a href="/">Back to the home page</a></p>
+    </div>
+  </section>
+</BaseLayout>

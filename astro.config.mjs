@@ -42,6 +42,9 @@ export default defineConfig({
       TURNSTILE_SECRET_KEY: envField.string({ context: 'server', access: 'secret', optional: true }),
       RESEND_API_KEY: envField.string({ context: 'server', access: 'secret', optional: true }),
       CONTACT_FROM_EMAIL: envField.string({ context: 'server', access: 'secret', optional: true }),
+      BEEHIIV_API_KEY: envField.string({ context: 'server', access: 'secret', optional: true }),
+      // Falls back to beehiivPublicationId in site settings.
+      BEEHIIV_PUBLICATION_ID: envField.string({ context: 'server', access: 'secret', optional: true }),
     },
   },
   integrations: [

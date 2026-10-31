@@ -2,18 +2,7 @@
 // sends with fetch so a failure keeps everything typed, and disables the button while sending.
 
 import { THANKS_PATHS, type Outcome } from './contact';
-
-const TURNSTILE_SCRIPT = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
-
-interface Turnstile {
-  render(container: HTMLElement, options: { sitekey: string }): string;
-  reset(widgetId?: string): void;
-}
-declare global {
-  interface Window {
-    turnstile?: Turnstile;
-  }
-}
+import { lazyTurnstile } from './turnstile-client';
 
 /** A mailto link carrying the message, so nothing is lost when sending fails (brief 12.4). */
 export function mailtoFallback(email: string, fields: Record<string, string>): string {
@@ -37,37 +26,10 @@ export function errorText(error: string | undefined): string {
   return "Your message wasn't sent. Everything you typed is still here, so try again in a moment";
 }
 
-let scriptLoading: Promise<void> | undefined;
-function loadTurnstile(): Promise<void> {
-  scriptLoading ??= new Promise((resolve, reject) => {
-    const script = document.createElement('script');
-    script.src = TURNSTILE_SCRIPT;
-    script.async = true;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error('Turnstile failed to load'));
-    document.head.append(script);
-  });
-  return scriptLoading;
-}
-
 export function enhanceContactForm(form: HTMLFormElement): void {
-  const container = form.querySelector<HTMLElement>('[data-turnstile]');
   const errorBox = form.querySelector<HTMLElement>('[data-form-error]');
   const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
-  let widgetId: string | undefined;
-
-  const startTurnstile = async () => {
-    if (!container?.dataset.sitekey || widgetId !== undefined) return;
-    widgetId = '';
-    try {
-      await loadTurnstile();
-      widgetId = window.turnstile?.render(container, { sitekey: container.dataset.sitekey });
-    } catch {
-      widgetId = undefined;
-    }
-  };
-  form.addEventListener('focusin', startTurnstile, { once: true });
-  form.addEventListener('pointerdown', startTurnstile, { once: true });
+  const turnstile = lazyTurnstile(form);
 
   const showError = (error: string | undefined) => {
     if (!errorBox) return;
@@ -107,7 +69,7 @@ export function enhanceContactForm(form: HTMLFormElement): void {
       showError(undefined);
     }
     // A Turnstile token works once; get a fresh one for the next try.
-    if (widgetId) window.turnstile?.reset(widgetId);
+    turnstile.reset();
     if (button) button.disabled = false;
   });
 }

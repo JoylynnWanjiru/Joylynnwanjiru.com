@@ -1,4 +1,6 @@
 ---
+import NewsletterForm from './NewsletterForm.astro';
+import { NEWSLETTER } from '../lib/newsletter';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PostList from './PostList.astro';
 import Pagination from './Pagination.astro';
@@ -27,7 +29,10 @@ const title = page === 1 ? 'Writing' : `Writing, page ${page}`;
     <div class="mx-auto max-w-article">
       <h1 class="text-4xl">Writing</h1>
       <p class="mt-4 text-lg text-muted"><Todo need="one line on what you write about" /></p>
-      <!-- The One Step subscribe form arrives with the Beehiiv integration (phase 3). -->
+      <div class="mt-6 rounded-lg border border-line p-5">
+        <p class="font-medium text-ink">Get new posts by email: {NEWSLETTER.pitch}</p>
+        <div class="mt-3"><NewsletterForm location="writing" /></div>
+      </div>
       <WritingFilters posts={posts} />
       <div class="mt-6">
         <PostList posts={items} />

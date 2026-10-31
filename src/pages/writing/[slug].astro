@@ -4,6 +4,8 @@ import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { SITE_URL, absoluteUrl, socialImagePath } from '../../lib/seo';
 import { isoDate } from '../../lib/dates';
+import NewsletterForm from '../../components/NewsletterForm.astro';
+import { NEWSLETTER } from '../../lib/newsletter';
 
 export async function getStaticPaths() {
   // Drafts are previewable in `astro dev` only (BR-5).
@@ -55,6 +57,11 @@ const blogPosting = {
       <div class="mt-8 text-post leading-[1.7]">
         <Content />
       </div>
+      <aside aria-labelledby="post-newsletter" class="mt-14 border-t border-line pt-8">
+        <h2 id="post-newsletter" class="text-xl">{NEWSLETTER.name}</h2>
+        <p class="mt-2 text-muted">{NEWSLETTER.pitch}</p>
+        <div class="mt-4"><NewsletterForm location="post" /></div>
+      </aside>
     </div>
   </article>
 </BaseLayout>

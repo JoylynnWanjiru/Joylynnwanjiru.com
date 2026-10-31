@@ -2,7 +2,7 @@
 
 Source for Joylynn Wanjiru's personal site: writing, a weekly Steps log, case studies and a way to work with her. `BUILD_BRIEF.md` is the full specification; this file describes only what is in the repo today.
 
-**Status:** Phase 2 (pages) of the build plan in brief section 9. Every page route exists with plain markup and visible placeholders; the visual pass against the design mockups is still to come. Forms render but do not send yet (Phase 3).
+**Status:** Phase 2 (pages) of the build plan in brief section 9. Every page route exists with plain markup and visible placeholders; the visual pass against the design mockups is still to come. Phase 3 (integrations) is in progress: the contact and newsletter forms send once their accounts' keys are set on Cloudflare; until then they answer "not configured".
 
 ## Pages
 
@@ -15,7 +15,10 @@ Source for Joylynn Wanjiru's personal site: writing, a weekly Steps log, case st
 | `/work/`, `/work/[slug]/` | Work index (service filter without JavaScript, experience timeline) and case studies |
 | `/about/` | About + Now (`#now`); `/now` redirects there |
 | `/work-with-me/`, `/work-with-me/[service]/` | Services, One Step Audit, Kadi, service pages |
-| `/contact/` | Contact form (posts to `/api/contact`, which arrives in Phase 3) |
+| `/contact/` | Contact form (posts to `/api/contact`) |
+| `/thanks/`, `/thanks/call/`, `/thanks/kadi/`, `/contact/error/` | Contact confirmations (BR-1, BR-2) and the no-JavaScript error page, `noindex` |
+| `/newsletter/thanks/`, `/newsletter/already/`, `/newsletter/error/` | One Step sign-up results for forms posted without JavaScript, `noindex` |
+| `/api/contact`, `/api/subscribe` | Server routes on Cloudflare: Turnstile check, then Resend (contact) or Beehiiv (newsletter) |
 | `/404` | Not found |
 
 Drafts (`draft: true`) render only in `pnpm dev`, never in a build (BR-5).
@@ -45,7 +48,7 @@ pnpm dev        # http://127.0.0.1:4321, editor at /keystatic (local mode)
 
 `pnpm dev` runs on Node without the Cloudflare adapter, because Keystatic's local mode needs file access. `pnpm build` and `pnpm preview` use the adapter.
 
-Copy `.env.example` to `.env` only if you need Keystatic's GitHub mode locally.
+Copy `.env.example` to `.env` if you need Keystatic's GitHub mode or want to try the forms locally (it lists Cloudflare's Turnstile test keys).
 
 ## Scripts
 
@@ -72,7 +75,8 @@ src/components/   Header, Footer, SEOHead, ThemeToggle, Todo placeholder, cards,
 src/content/      Posts, steps, projects, experience, services, testimonials, page singletons, settings
 src/layouts/      BaseLayout
 src/lib/          Shared helpers: slugs, dates, reading time, SEO, site settings, social images,
-                  collection queries, prices and booking links, contact form options
+                  collection queries, prices and booking links, contact form options,
+                  newsletter copy, form scripts; server/ holds the form route logic
 src/pages/        Routes, including og/ (social images), rss.xml, robots.txt, llms.txt
 test/             Vitest tests, including the Keystatic/Astro schema drift test
 keystatic.config.ts   Editor collections (kept in step with src/content.config.ts)
@@ -98,7 +102,10 @@ The build fails if a published post, step or project has no description, an imag
 
 ## Environment variables
 
-Names are in `.env.example`; values live only in `.env` (git-ignored) and on Cloudflare.
+Names are in `.env.example`; values live only in `.env` (git-ignored) and on Cloudflare. They are typed through `astro:env` in `astro.config.mjs`:
+
+- Worker secrets: `TURNSTILE_SECRET_KEY`, `RESEND_API_KEY`, `CONTACT_FROM_EMAIL` (optional), `BEEHIIV_API_KEY`, `BEEHIIV_PUBLICATION_ID` (or set it in site settings), plus the three Keystatic secrets.
+- Workers Builds build variables (inlined at build): `TURNSTILE_SITE_KEY`, `PUBLIC_KEYSTATIC_GITHUB_APP_SLUG`.
 
 ## License
 

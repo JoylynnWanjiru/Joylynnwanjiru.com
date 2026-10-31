@@ -15,6 +15,8 @@ import {
   sendWithResend,
 } from '../../lib/server/contact';
 import { respond } from '../../lib/server/respond';
+import { subscribe } from '../../lib/server/subscribe';
+import { SITE_URL } from '../../lib/seo';
 
 // POST /api/contact (brief section 8). Rendered on demand on Cloudflare.
 export const prerender = false;
@@ -66,6 +68,17 @@ export const POST: APIRoute = async ({ request }) => {
   if (!sent.ok) {
     console.error(`contact: Resend failed (status ${sent.status})`);
     return respond(request, 502, { error: 'send' }, CONTACT_ERROR_PATH);
+  }
+
+  // Newsletter opt-in (brief section 8): best effort, the message is already delivered.
+  const beehiivKey = getSecret('BEEHIIV_API_KEY');
+  const publicationId = getSecret('BEEHIIV_PUBLICATION_ID') || site.beehiivPublicationId;
+  if (message.newsletter && beehiivKey && publicationId) {
+    const { result, status } = await subscribe(
+      { email: message.email, location: 'contact', path: '/contact/' },
+      { apiKey: beehiivKey, publicationId, siteUrl: SITE_URL },
+    );
+    if (result === 'failed') console.error(`contact: newsletter opt-in failed (status ${status})`);
   }
 
   const outcome = outcomeFor(message);

@@ -1,6 +1,8 @@
 ---
 import { getSite } from '../lib/site';
 import Todo from './Todo.astro';
+import NewsletterForm from './NewsletterForm.astro';
+import { NEWSLETTER } from '../lib/newsletter';
 
 const site = await getSite();
 const year = new Date().getFullYear();
@@ -14,10 +16,10 @@ const year = new Date().getFullYear();
       <p class="text-muted"><Todo need="social links" blocker /></p>
     </div>
 
-    <section id="newsletter" aria-labelledby="newsletter-heading" class="space-y-2">
-      <h2 id="newsletter-heading" class="text-xl">One Step</h2>
-      <p class="text-muted">What I'm building, learning and figuring out, one step at a time.</p>
-      <!-- The subscribe form arrives with the Beehiiv integration (phase 3). -->
+    <section id="newsletter" aria-labelledby="newsletter-heading" class="space-y-3">
+      <h2 id="newsletter-heading" class="text-xl">{NEWSLETTER.name}</h2>
+      <p class="text-muted">{NEWSLETTER.pitch}</p>
+      <NewsletterForm location="footer" />
     </section>
   </div>
 

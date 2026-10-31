@@ -1,0 +1,27 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Todo from '../../components/Todo.astro';
+import { getSite } from '../../lib/site';
+import { MARKER } from '../../../build/launch.mjs';
+
+// Where /api/contact sends a form posted without JavaScript when it cannot be delivered
+// (brief 12.4). With JavaScript the form shows the error in place and keeps every field.
+const site = await getSite();
+const hasEmail = !site.email.includes(MARKER);
+---
+
+<BaseLayout title="Message not sent" description="Your message could not be sent." noindex>
+  <section class="container-site py-20">
+    <div class="mx-auto max-w-article">
+      <h1 class="text-4xl">Your message wasn't sent.</h1>
+      <p class="mt-4 text-lg text-muted">
+        Something went wrong on my side, or a field was missing. Go back to keep what you typed and try again, or email
+        me directly.
+      </p>
+      <p class="mt-6">
+        {hasEmail ? <a href={`mailto:${site.email}`}>{site.email}</a> : <Todo need="contact email" />}
+      </p>
+      <p class="mt-10"><a href="/contact/">Back to the contact form</a></p>
+    </div>
+  </section>
+</BaseLayout>

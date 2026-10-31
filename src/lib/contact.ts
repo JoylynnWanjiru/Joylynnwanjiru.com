@@ -38,3 +38,14 @@ export function topicFromQuery(search: string, topics: Option[]): string {
   const topic = new URLSearchParams(search).get('topic') ?? '';
   return topics.some((option) => option.value === topic) ? topic : '';
 }
+
+/** Which confirmation the visitor sees after sending (BR-1, BR-2). */
+export type Outcome = 'call' | 'thanks' | 'kadi';
+
+/** The confirmation page for each outcome. Static pages, so they work without JavaScript. */
+export const THANKS_PATHS: Record<Outcome, string> = {
+  call: '/thanks/call/',
+  thanks: '/thanks/',
+  kadi: '/thanks/kadi/',
+};
+export const CONTACT_ERROR_PATH = '/contact/error/';

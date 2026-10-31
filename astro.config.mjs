@@ -1,5 +1,5 @@
 // @ts-check
-import { defineConfig, fontProviders } from 'astro/config';
+import { defineConfig, envField, fontProviders } from 'astro/config';
 import cloudflare from '@astrojs/cloudflare';
 import react from '@astrojs/react';
 import mdx from '@astrojs/mdx';
@@ -34,6 +34,16 @@ export default defineConfig({
   // Inline the site CSS (about 5 KB) so it does not block first paint with an
   // extra request; it sits just above the default 4 KB inline limit (brief section 7, LCP).
   build: { inlineStylesheets: 'always' },
+  // Form integrations (brief section 8). All optional so the site builds before the
+  // accounts exist; the routes answer "not configured" until they are set.
+  env: {
+    schema: {
+      TURNSTILE_SITE_KEY: envField.string({ context: 'client', access: 'public', optional: true }),
+      TURNSTILE_SECRET_KEY: envField.string({ context: 'server', access: 'secret', optional: true }),
+      RESEND_API_KEY: envField.string({ context: 'server', access: 'secret', optional: true }),
+      CONTACT_FROM_EMAIL: envField.string({ context: 'server', access: 'secret', optional: true }),
+    },
+  },
   integrations: [
     react(),
     mdx(),

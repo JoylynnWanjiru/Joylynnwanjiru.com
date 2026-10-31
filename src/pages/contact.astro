@@ -5,6 +5,7 @@ import { getServices } from '../lib/entries';
 import { getSite } from '../lib/site';
 import { BUDGETS, LIMITS, TIMELINES, contactTopics } from '../lib/contact';
 import { MARKER } from '../../build/launch.mjs';
+import { TURNSTILE_SITE_KEY } from 'astro:env/client';
 
 const [site, services] = await Promise.all([getSite(), getServices()]);
 const topics = contactTopics(services);
@@ -22,9 +23,9 @@ const hasEmail = !site.email.includes(MARKER);
       <h1 class="text-4xl">Contact</h1>
       <p class="mt-4 text-lg text-muted">Tell me a little about what you need. I reply by email.</p>
 
-      {/* A real HTML form, so it works without JavaScript (brief 12.4). /api/contact
-          arrives in Phase 3 with Turnstile (BR-12), Resend and the BR-1 confirmation. */}
-      <form method="post" action="/api/contact" class="contact-form mt-10 space-y-6" data-contact-form>
+      {/* A real HTML form posting to /api/contact (brief 12.4). The script below sends it
+          with fetch so an error keeps everything typed; /api/contact checks Turnstile (BR-12). */}
+      <form method="post" action="/api/contact" class="contact-form mt-10 space-y-6" data-contact-form data-email={hasEmail ? site.email : undefined}>
         <div class="grid gap-6 sm:grid-cols-2">
           <div>
             <label for="name">Name <span class="required" aria-hidden="true">*</span></label>
@@ -107,9 +108,14 @@ const hasEmail = !site.email.includes(MARKER);
           Also send me One Step: what I'm building, learning and figuring out, one step at a time.
         </label>
 
+        {/* Turnstile loads on the first interaction with the form, not on page load (brief section 7). */}
+        {TURNSTILE_SITE_KEY ? <div data-turnstile data-sitekey={TURNSTILE_SITE_KEY}></div> : <Todo need="Turnstile site key (TURNSTILE_SITE_KEY)" />}
+
         <p class="text-sm text-muted"><span aria-hidden="true">*</span> Required</p>
 
-        <button type="submit" class="rounded-full bg-blue px-6 py-3 font-medium text-on-blue">Send message</button>
+        <div role="alert" tabindex="-1" class="form-error" data-form-error hidden></div>
+
+        <button type="submit" class="rounded-full bg-blue px-6 py-3 font-medium text-on-blue disabled:opacity-60">Send message</button>
       </form>
 
       <section aria-labelledby="direct-heading" class="mt-14 border-t border-line pt-8">
@@ -127,6 +133,7 @@ const hasEmail = !site.email.includes(MARKER);
 
 <script>
   import { topicFromQuery } from '../lib/contact';
+  import { enhanceContactForm } from '../lib/contact-form';
 
   // Preselect the topic from ?topic= (for example /contact/?topic=kadi). Without
   // JavaScript the visitor simply picks it.
@@ -136,6 +143,9 @@ const hasEmail = !site.email.includes(MARKER);
     const topic = topicFromQuery(window.location.search, topics.filter((option) => option.value));
     if (topic) select.value = topic;
   }
+
+  const form = document.querySelector<HTMLFormElement>('[data-contact-form]');
+  if (form) enhanceContactForm(form);
 </script>
 
 <style>
@@ -163,5 +173,6 @@ const hasEmail = !site.email.includes(MARKER);
   .contact-form .optional,
   .contact-form .hint { font-weight: 400; color: var(--muted); font-size: 0.875rem; }
   .contact-form .hint { margin-top: 0.25rem; }
+  .form-error { border-left: 3px solid var(--pink-text); padding: 0.5rem 0 0.5rem 1rem; }
   .honeypot { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
 </style>

@@ -43,6 +43,13 @@ export function buildRules(siteUrl) {
         await rm(join(out, 'build'), { recursive: true });
 
         hidden = published.hidden;
+        // Code pages marked noindex (confirmations, errors) are hidden too, not only content entries.
+        const listed = new Set(hidden.map((page) => page.path));
+        for (const file of await htmlFiles(out)) {
+          const path = pagePath(relative(out, file));
+          if (listed.has(path) || !/<meta name="robots" content="noindex/.test(await readFile(file, 'utf8'))) continue;
+          hidden.push({ path, reason: 'noindex' });
+        }
         for (const page of hidden) hiddenPaths.add(page.path);
 
         // Redirects (BR-11): old slug → current page, 301.

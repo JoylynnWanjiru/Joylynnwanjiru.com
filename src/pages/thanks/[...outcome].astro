@@ -1,0 +1,61 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Todo from '../../components/Todo.astro';
+import { getSite } from '../../lib/site';
+import { bookingUrl, FREE_CALL_FILTER } from '../../lib/offer';
+import type { Outcome } from '../../lib/contact';
+
+// Contact confirmations (brief section 5, Contact; BR-1, BR-2). Static pages, so a form
+// posted without JavaScript lands on the same confirmation (brief 12.4).
+export function getStaticPaths() {
+  return [
+    { params: { outcome: undefined }, props: { outcome: 'thanks' as Outcome } },
+    { params: { outcome: 'call' }, props: { outcome: 'call' as Outcome } },
+    { params: { outcome: 'kadi' }, props: { outcome: 'kadi' as Outcome } },
+  ];
+}
+
+const { outcome } = Astro.props;
+const site = await getSite();
+const callHref = site.bookingLinks.freeCall ? bookingUrl(site.bookingLinks.freeCall, 'contact-confirmation') : null;
+---
+
+<BaseLayout title="Message sent" description="Thanks for getting in touch." noindex>
+  <section class="container-site py-20">
+    <div class="mx-auto max-w-article">
+      <h1 class="text-4xl">Thanks, your message is on its way.</h1>
+      {
+        outcome === 'call' && (
+          <>
+            <p class="mt-4 text-lg text-muted">
+              If you'd like to talk it through, book a free 20-minute call. I'll also reply by email.
+            </p>
+            <p class="mt-2 text-muted">{FREE_CALL_FILTER}</p>
+            <p class="mt-8">
+              {callHref ? (
+                <a href={callHref} class="inline-block rounded-full bg-blue px-6 py-3 font-medium text-on-blue no-underline">
+                  Book a free call
+                </a>
+              ) : (
+                <Todo need="Cal.com free-call booking link" blocker />
+              )}
+            </p>
+          </>
+        )
+      }
+      {outcome === 'kadi' && <p class="mt-4 text-lg text-muted">I'll reply by email about renting Kadi.</p>}
+      {
+        outcome === 'thanks' && (
+          <>
+            <p class="mt-4 text-lg text-muted">I'll reply by email.</p>
+            <p class="mt-4">
+              While you wait, <a href="/start/">Start here</a> has the best place to begin, or get{' '}
+              <a href="#newsletter">One Step</a>, my newsletter.
+            </p>
+          </>
+        )
+      }
+      <p class="mt-10"><a href="/">Back to the home page</a></p>
+    </div>
+  </section>
+</BaseLayout>

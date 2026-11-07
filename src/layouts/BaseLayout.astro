@@ -3,10 +3,17 @@ import { Font } from 'astro:assets';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import SEOHead, { type Props as SEOProps } from '../components/SEOHead.astro';
+import { getSite } from '../lib/site';
 import '../styles/global.css';
 
 type Props = SEOProps;
 const { noindex } = Astro.props;
+
+// Cloudflare Web Analytics beacon (brief section 8): cookie-less page views only.
+// Loaded in production once the token is set in site settings; absent on previews
+// and locally, so no beacon fires until Joylynn adds the token. CSP already allows
+// static.cloudflareinsights.com (script) and cloudflareinsights.com (connect).
+const cfAnalyticsToken = (await getSite()).analytics.cloudflareToken;
 ---
 
 <!doctype html>
@@ -37,5 +44,15 @@ const { noindex } = Astro.props;
       <slot />
     </main>
     <Footer />
+    {
+      cfAnalyticsToken && (
+        <script
+          is:inline
+          defer
+          src="https://static.cloudflareinsights.com/beacon.min.js"
+          data-cf-beacon={JSON.stringify({ token: cfAnalyticsToken })}
+        />
+      )
+    }
   </body>
 </html>
